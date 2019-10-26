@@ -14,6 +14,10 @@
 
 
   Revision
+  0.8.3
+  HurMakeSymmetricMatrix[] is modified to accept a list of 6 elements or simply 6 separate elements.
+  HurMatrixVectorProduct[] is added to facilitate angular momentum calculation. H=Iw
+
   0.8.2
   HurNEInverse[] is added. HurNEInverse[] is the same as HurSolveNEInverse[]. HurNEInverse[] is simply matching HurELInverse[].
 
@@ -38,7 +42,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "0.8.2";
+$VERSION$ = "0.8.3";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["Hur Toolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -103,6 +107,7 @@ HurSolveNEInverse::usage="HurSolveNEInverse[] returns the the variables defined 
 HurNEInverse::usage="HurNEInverse[] is exactly the same as HurSolveNEInverse[]. HurNEInverse[] is to match with HurELInverse[]";
 HurNEForward::usage="HurNEForward[]";
 HurMakeSymmetricMatrix::usage="HurMakeSymmetricMatrix[list_]";
+HurMatrixVectorProduct::usage="HurMatrixVectorProduct[mat_,vec_,rf_]"
 HurDefineGeneralizedCoordinates::usage="HurDefineGeneralizedCoordinates[f__]";
 HurELEquation::usage="HurELEquation[]";
 HurDefineConstraints::usage="HurDefineConstraints[con__]";
@@ -554,11 +559,12 @@ HurNEInverse[] := (
     ]
   )
 
+HurMakeSymmetricMatrix[lists__] := (
+  list=Flatten[List[lists]];
+  {{list[[1]], list[[2]], list[[3]] }, {list[[2]], list[[4]], list[[5]] },{list[[3]],list[[5]],list[[6]]}}
+  )
 
-
-
-HurMakeSymmetricMatrix[list_] := {{list[[1]], list[[2]], list[[3]] }, {list[[2]], list[[4]], list[[5]] },{list[[3]],list[[5]],list[[6]]}}
-
+HurMatrixVectorProduct[mat_,vec_,rf_] := mat.HurUnifyTriadsCoord[vec,rf][[1;;3]]
 
 
 
