@@ -14,9 +14,6 @@
 
 
   Revision
-  0.8.7
-  HurGetJacobian[] is added
-
   0.8.6
   HurConstrainedNEInverse[] is added
   HurTurnOnSimplify[] is added
@@ -80,7 +77,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "0.8.7";
+$VERSION$ = "0.8.6";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["Hur Toolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -140,7 +137,6 @@ HurSetLagrangian::usage="HurSetLagrangian[lag_,rf_] can let you specify Lagrangi
 HurDefineVertical::usage="HurDefineVertical[v_]";
 HurGetELEquation::usage="HurGetELEquation[gc__]";
 HurSetELEquation::usage="HurSetELEquation[eq_,gc_]";
-HurGetJacobian::usage="HurGetJacobian[vec_,rf1_,rf2_] computes Jacobian matrix. vec_ can be either a position vector of a point of interest or velocity vector. rf1_ is the RF for angular velocity of your interest. rf2_ is expression of your vec_. rf2_ is usually n. However, it can also be a or b depending on your convenience."; 
 HurGetMMatrix::usage="HurGetMMatrix[]";
 HurGetCMatrix::usage="HurGetCMatrix[]";
 HurGetGVector::usage="HurGetGVector[]";
@@ -722,24 +718,6 @@ HurSetLagrangian[lag_,rf_] := (
     Total[HurGlobalLagrangian]
   )
 
-HurGetJacobian[vec_,rf1_,rf2_] := (ngcs=Length[HurGlobalGeneralizedCoordinates];
-  (* check if vec_ includes q only or qdot. If q only, then it is a position vector. If qdot is included, then vec_ is velocity vector. *)
-  GCdots=Table[ D[ HurGlobalGeneralizedCoordinates[[i]],Global`t], {i,ngcs}];
-  Zeros=Table[0, {i, ngcs}];
-  vec1=HurUnifyTriads[vec,rf2];
-  vel1=HurVectorDiff[vec1, HurGlobalRF[[1]] ,rf2];
-  omega=HurUnifyTriadsCoord[ HurGetAngularVel[rf1,rf2], rf2 ];
-  vel=If[Grad[vec1,GCdots]===Zeros,HurUnifyTriadsCoord[ vel1, rf2 ],HurUnifyTriadsCoord[ vec1, rf2 ] ];
-  List[
-    Grad[ vel[[1]],GCdots ],
-    Grad[ vel[[2]],GCdots ],
-    Grad[ vel[[3]],GCdots ],
-    Grad[ omega[[1]],GCdots ],
-    Grad[ omega[[2]],GCdots ],
-    Grad[ omega[[3]],GCdots ]
-  ]
-  )
-
 HurSetELEquation[eq_,gc_] := (
     HurGlobalELEquation[[ Position[ HurGlobalGeneralizedCoordinates,gc ] [[1]][[1]] ]] = eq;
     HurGlobalELEquation
@@ -848,7 +826,7 @@ HurELInverse[] := (
   If[
       Total[HurGlobalVariableList] === 0
       ,
-      tempvariables=Flatten[ Table[ D[ HurGlobalGeneralizedCoordinates[[k]],Global`t,Global`t ], {k,n} ] ];
+      tempvariables=Flatten[ Table[ D[ HurGlobalGeneralizedCoordinates[[k]],Global`t,Global`t ], {k,n} ] ]; ;
       ,
       tempvariables=HurGlobalVariableList;
     ];
