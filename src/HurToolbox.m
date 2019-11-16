@@ -14,6 +14,9 @@
 
 
   Revision
+  0.8.8
+  HurGetGVector[] is updated to iinclude spring energy and RayleighDissipative energy
+ 
   0.8.7
   HurGetJacobian[] is added
 
@@ -80,7 +83,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "0.8.7";
+$VERSION$ = "0.8.8";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["Hur Toolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -141,9 +144,9 @@ HurDefineVertical::usage="HurDefineVertical[v_]";
 HurGetELEquation::usage="HurGetELEquation[gc__]";
 HurSetELEquation::usage="HurSetELEquation[eq_,gc_]";
 HurGetJacobian::usage="HurGetJacobian[vec_,rf1_,rf2_] computes Jacobian matrix. vec_ can be either a position vector of a point of interest or velocity vector. rf1_ is the RF for angular velocity of your interest. rf2_ is expression of your vec_. rf2_ is usually n. However, it can also be a or b depending on your convenience."; 
-HurGetMMatrix::usage="HurGetMMatrix[]";
-HurGetCMatrix::usage="HurGetCMatrix[]";
-HurGetGVector::usage="HurGetGVector[]";
+HurGetMMatrix::usage="HurGetMMatrix[] returns the inertia matrix.";
+HurGetCMatrix::usage="HurGetCMatrix[] returns the matrix for Coriolis and centrifugal forces";
+HurGetGVector::usage="HurGetGVector[] returns the gravity vector. Note that it will also return other forces due to spring and Rayleigh Dissipative (viscous damping) forces.";
 HurNEEquation::usage="HurNEEquation[]";
 HurDefineVariableList::usage="HurDefineVariableList[f__]";
 HurResetVariableList::usage="HurResetVariableList[] resets all variable list for Inverse of either NE or EL equations";
@@ -937,8 +940,11 @@ HurGetCMatrix[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Le
   )
 
 HurGetGVector[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Length[gcs];
+  PE=Total[HurGlobalPotentialE+HurGlobalOtherPotentialE]
+  DE=Total[HurGlobalRayleighDissipationE]
+
   HurGlobalGVector=Table[
-    temp=D[ Total[HurGlobalPotentialE], gcs[[i]] ];
+    temp=D[ PE , gcs[[i]] ] + D[ DE , D[gcs[[i]],Global`t] ];
     If[HurGlobalSimplify, Simplify[temp], temp]
       ,
       {i,narg}
