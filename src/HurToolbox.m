@@ -14,6 +14,9 @@
 
 
   Revision
+  0.8.9
+  Added the explanation for HurDumpSaveData, HurSaveData, and HurLoadData
+  
   0.8.8
   HurGetGVector[] is updated to iinclude spring energy and RayleighDissipative energy
  
@@ -171,8 +174,8 @@ HurDefineOtherPotentialE::usage="HurDefineOtherPotentialE[rf_, pe_] accepts the 
 HurDefineRayleighDissipationE::usage="HurDefineRayleighDissipationE[rf_, de_] accepts the velocity-proportional frictional forces in Lagrangian mechanics. Example includes viscous damping friction."; 
 HurGetInertiaTensor::usage="HurGetInertiaTensor[rf_]"; 
 HurProductMatVec::usage="HurProductMatVec[mat_,vec_,rf_]"; 
-HurDumpSaveData::usage="HurDumpSaveData[filename__]";
-HurSaveData::usage="HurSaveData[filename__]";
+HurDumpSaveData::usage="HurDumpSaveData[filename__] Please use .mx for the extension of the filename. It will save variables in binary (unreadable) expression, is very fast to load (with large data). However, this binary data are platform-specific. If saved in Mac, it cannot be used in Windows or Linux.";
+HurSaveData::usage="HurSaveData[filename__]. Please use .m for the extension of the filename. It will save variables in (readable) portable expression (or ascii format), is very slow to load (with large data). This data are platform-independent. You can use in any platforms.";
 HurLoadData::usage="HurLoadData[filename_]";
 
 
@@ -1006,7 +1009,7 @@ HurDefineGeneralizedCoordinates[gc__] := (gcs=Flatten[ List[ gc ] ]; ngcs=Length
 
 
 HurSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[filenames];
-  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
+  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
   If[
       nargs===1
       ,
@@ -1025,7 +1028,7 @@ HurSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[f
   )
 
 HurDumpSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[filenames];
-  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
+  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
   If[
       nargs===1
       ,
