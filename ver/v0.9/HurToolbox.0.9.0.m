@@ -14,18 +14,6 @@
 
 
   Revision
-  0.9.3
-  HurSimplifyVariablesTimed[], HurFullSimplifyVariablesTimed[] are added.
-  HurGlobalConstrainedELEquation is all replaced by HurGlobalELEquation
-
-  0.9.2
-  Please add ";" at the end of each line.
-  "Set::write: Tag Times in 0 {} is Protected." was fixed by adding ";" at the 
-  PE=Total[HurGlobalPotentialE];
-
-  0.9.1
-  Kane
-
   0.9.0
   revised HurUnifyTriads[]. It now uses HurCoordTriads
 
@@ -101,7 +89,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "0.9.3";
+$VERSION$ = "0.8.8";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["Hur Toolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -189,9 +177,6 @@ HurDefineOtherPotentialE::usage="HurDefineOtherPotentialE[rf_, pe_] accepts the 
 HurDefineRayleighDissipationE::usage="HurDefineRayleighDissipationE[rf_, de_] accepts the velocity-proportional frictional forces in Lagrangian mechanics. Example includes viscous damping friction."; 
 HurGetInertiaTensor::usage="HurGetInertiaTensor[rf_]"; 
 HurProductMatVec::usage="HurProductMatVec[mat_,vec_,rf_]"; 
-HurDefineGeneralizedSpeedsConstraints::usage="HurDefineGeneralizedSpeedsConstraints[gs__] defines the generalized speeds for Kane's method"; 
-HurSimplifyVariablesTimed::usage="HurSimplifyVariablesTimed[var_,time_] simplifies all the elements of the provided var_ within the provided time_ for each element. If timed out, it will return its original expression"; 
-HurFullSimplifyVariablesTimed::usage="HurFullSimplifyVariablesTimed[var_,time_] fully simplifies all the elements of the provided var_ within the provided time_ for each element. If timed out, it will return its original expression"; 
 HurDumpSaveData::usage="HurDumpSaveData[filename__] Please use .mx for the extension of the filename. It will save variables in binary (unreadable) expression, is very fast to load (with large data). However, this binary data are platform-specific. If saved in Mac, it cannot be used in Windows or Linux.";
 HurSaveData::usage="HurSaveData[filename__]. Please use .m for the extension of the filename. It will save variables in (readable) portable expression (or ascii format), is very slow to load (with large data). This data are platform-independent. You can use in any platforms.";
 HurLoadData::usage="HurLoadData[filename_]";
@@ -214,9 +199,8 @@ HurInitialize[] := (
   HurGlobalListTriads = {{n1,n2,n3}}; 
   HurGlobalTriadsConversion = {{n1->n1,n2->n2,n3->n3}};
   (*HurGlobalTriadsConversion = {0};*)
-  HurGlobalSimplify = True; HurGlobalGeneralizedSpeedsConstraints = {};
-  HurGlobalGeneralizedSpeeds = {}; HurGlobalKaneEquation = {0};
-  HurGlobalTemp = {0}; 
+  HurGlobalSimplify = True; HurGlobalGeneralizedSpeeds = {};
+  HurGlobalKaneEquation = {0};
 )
 
 Begin["`Private`"];
@@ -845,9 +829,10 @@ HurELEquation[] := (nrfs=HurGetNumGlobalRF[];
       {i,2,nrfs}
       ];
 
+
+
     HurGetLagrangian[ HurGlobalRF[[2 ;; nrfs]] ];
     HurGetELEquation[ HurGlobalGeneralizedCoordinates ];
-    
     HurGetMMatrix[];
     HurGetCMatrix[];
     HurGetGVector[];
@@ -867,8 +852,8 @@ HurConstrainedELEquation[] := (
   HurDefineLambda[];
   m=Length[HurGlobalLambda];
   HurGlobalGeneralizedConstrainingForce=Transpose[HurGlobalConstrainedJacobian].HurGlobalLambda;
-  HurGlobalELEquation=HurGlobalELEquation-HurGlobalGeneralizedConstrainingForce;
-  HurGlobalELEquation
+  HurGlobalConstrainedELEquation=HurGlobalELEquation-HurGlobalGeneralizedConstrainingForce;
+  HurGlobalConstrainedELEquation
   )
 
 HurELInverse[] := (
@@ -889,7 +874,7 @@ HurELInverse[] := (
 
 
 HurConstrainedELInverse[] := (
-  n=Length[HurGlobalELEquation];
+  n=Length[HurGlobalConstrainedELEquation];
   m=Length[HurGlobalConstraints];
   (* GCdots=Table[ D[ HurGlobalGeneralizedCoordinates[[k]] , Global`t ] , {k,n} ]; *)
   GCddots=Table[ D[ HurGlobalGeneralizedCoordinates[[k]] , Global`t , Global`t ] , {k,n} ];
@@ -919,7 +904,7 @@ HurConstrainedELInverse[] := (
     ];
 
   tempequations=Flatten[ List[ 
-    Table[HurGlobalELEquation[[i]]==0,{i,n} ]
+    Table[HurGlobalConstrainedELEquation[[i]]==0,{i,n} ]
     ,
     Table[HurGlobalConstrainedModified[[i]]==0,{i,m} ]
     ] 
@@ -966,17 +951,18 @@ HurGetCMatrix[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Le
   )
 
 HurGetGVector[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Length[gcs];
-  PE=Total[HurGlobalPotentialE]+Total[HurGlobalOtherPotentialE];
-  DE=Total[HurGlobalRayleighDissipationE];
+  PE=Total[HurGlobalPotentialE+HurGlobalOtherPotentialE]
+  DE=Total[HurGlobalRayleighDissipationE]
 
   HurGlobalGVector=Table[
-    temp=D[ PE , gcs[[i]] ] + D[ DE , D[gcs[[i]],Global`t] ] ; 
+    temp=D[ PE , gcs[[i]] ] + D[ DE , D[gcs[[i]],Global`t] ];
     If[HurGlobalSimplify, Simplify[temp], temp]
       ,
       {i,narg}
     ];
   HurGlobalGVector
   )
+
 
 HurDefineConstraints[con__] := (cons=Flatten[ List[ con ] ];ncon=Length[ cons ];
   Do[
@@ -1029,95 +1015,6 @@ HurDefineGeneralizedCoordinates[gc__] := (gcs=Flatten[ List[ gc ] ]; ngcs=Length
   HurGlobalConstrainedELEquation=Table[0,{i,ngcs}];
   )
 
-(* Kane Method *)
-HurDefineGeneralizedSpeedsConstraints[gs__] := (gss=Flatten[ List[ gs ] ]; ngss=Length[gss];
-  HurGlobalGeneralizedSpeedsConstraints=gss;
-  HurGlobalKaneEquation=Table[0,{i,ngss}];
-
-  HurGlobalGeneralizedSpeeds=Table[ ToExpression["u" <> ToString[i] <> "[t]" ] ,{i,ngss} ];
-  (* Global`t *)
-
-  ngcs=Length[HurGlobalGeneralizedCoordinates]
-  (* ngcs-ngss is the number of nonholonomic constraints *)
-
-
-  )
-
-(*
-  identify all nonholonomic constraints
-  reduce the generalized coordinates to remove the constraints
-  identify RFs that have inertia
-  convert vCom with generalized speeds
-  convert Hc with generalized speeds
-
-
-  *)
-
-HurSimplifyVariablesTimed[var_,time_] := (
-  dims=Dimensions[var];
-  totalnum = Product[dims[[i]], {i, Length[dims]}];
-  vec = ArrayReshape[var, {totalnum}];
-  
-  Print["There are " , ToString[totalnum] , " components to be simplified."];
-  curTimeConst=OptionValue[Simplify, TimeConstraint];
-  If[
-    curTimeConst<time
-    ,
-    Print["The current Maximum Time for Simplify is set to ", ToString[curTimeConst] , " seconds. However, you requested longer time (" , ToString[time] , " seconds). The Maximum Time will be temporarily set to " , ToString[time] , " seconds."];
-    SetOptions[Simplify, TimeConstraint -> time];
-    ,
-    Null
-    ]
-
-  Do[
-    temp = Timing[TimeConstrained[Simplify[ vec[[i]] ], time]];
-    If[
-      temp[[2]] === $Aborted
-      ,
-        Print[ToString[i], "/" , ToString[totalnum], " components could not be simplified in " , ToString[time] , " seconds." ];
-      ,
-        Print[ToString[i], "/" , ToString[totalnum], " components was successfully simplified in " , ToString[temp[[1]]], " seconds."];
-        vec[[i]]=temp[[2]];
-      ];
-    ,
-    {i,totalnum}
-    ];
-  SetOptions[Simplify, TimeConstraint -> curTimeConst];
-  ArrayReshape[vec, dims]
-  )
-
-HurFullSimplifyVariablesTimed[var_,time_] := (
-  dims=Dimensions[var];
-  totalnum = Product[dims[[i]], {i, Length[dims]}];
-  vec = ArrayReshape[var, {totalnum}];
-  
-  Print["There are " , ToString[totalnum] , " components to be fully simplified."];
-  curTimeConst=OptionValue[FullSimplify, TimeConstraint];
-  If[
-    curTimeConst<time
-    ,
-    Print["The current Maximum Time for FullSimplify is set to ", ToString[curTimeConst] , " seconds. However, you requested longer time (" , ToString[time] , " seconds). The Maximum Time will be temporarily set to " , ToString[time] , " seconds."];
-    SetOptions[FullSimplify, TimeConstraint -> time];
-    ,
-    Null
-    ]
-
-  Do[
-    temp = Timing[TimeConstrained[FullSimplify[ vec[[i]] ], time]];
-    If[
-      temp[[2]] === $Aborted
-      ,
-        Print[ToString[i], "/" , ToString[totalnum], " components could not be fully simplified in " , ToString[time] , " seconds." ];
-      ,
-        Print[ToString[i], "/" , ToString[totalnum], " components was successfully fully simplified in " , ToString[temp[[1]]], " seconds."];
-        vec[[i]]=temp[[2]];
-      ];
-    ,
-    {i,totalnum}
-    ];
-  SetOptions[FullSimplify, TimeConstraint -> curTimeConst];
-  ArrayReshape[vec, dims]
-  )
 
 HurSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[filenames];
   tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
