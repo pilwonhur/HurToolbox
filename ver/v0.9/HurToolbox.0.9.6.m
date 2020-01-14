@@ -14,27 +14,6 @@
 
 
   Revision
-  0.9.9
-  HurToMatlab[] is added.
-  Kane method;
-  HurDot[] is modified to accept dot product between dyadic, vector, and coordindate form.
-  HurDefineInertia[] defines not only inertia matrix but also inertia dyadic.
-
-  0.9.8
-  HurHamiltonEquation[] now includes all nonconservative forces.
-  HurConstrainedHamiltonEquation[] is added.
-  HurResetNonConservativeForces[] is added.
-  HurToJulia[] is added
-  HurToPython[] is added
-  HurResetNonConservativeForces[] is updated.
-
-  0.9.7
-  The following functions for the Hamiltonian mechanics are added.
-  HurDefineGeneralizedMomentumSymbol[]
-  HurDefineGeneralizedMomentumExpression[]
-  HurGetHamiltonian[]
-  HurHamiltonEquation[]
-
   0.9.6
   The following two equations are modified to accept no-argument cases.
   In this way, user-defined Lagrangian and the corresponding EL equations can be computed.
@@ -144,9 +123,9 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "0.9.9";
+$VERSION$ = "0.9.6";
 $EMAIL$ = "pilwonhur@tamu.edu";
-Print["HurToolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nHurToolbox mainly uses vector manipulation (vectors, dyadics).\nCoordinates and matrix representation of the dyadics are also available.\nAvailable methods: Newton-Euler Method, Euler-Lagrange Method, Hamiltonian Method, Kane's Method.\nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
+Print["Hur Toolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
 
 HurDefineRF::usage="HurDefineRF[rf__] defines a reference frame. Ex) HurDefineRF[b]: to define a reference frame B. HurDefineRF[a,b]: to define reference frames a, and b at the same time.";
@@ -161,23 +140,18 @@ HurDefineInertia::usage="HurDefineInertia[rf_, II_] defines the inertia matrix o
 HurGetAngularVel::usage="HurGetAngularVel[rf1_,rf2_] returns the angular velocity of the reference frame rf1 with respect to the world reference frame n using the triads of rf2. It uses skew symmetric matrix Sw such that Sw=R_dot x R'. Ex) w=HurGetAngularVel[b,d]";
 HurGetAngularVel1::usage="HurGetAngularVel1[] returns the angular velocity of the reference frame rf1 with respect to the world reference frame n using the triads of rf2. It uses skew symmetric matrix Sw such that Sw=R_dot x R'. Ex) w=HurGetAngularVel[b,d]";
 HurGetAngularAcc::usage="HurGetAngularAcc[rf1_,rf2_] returns the angular acceleration of the reference frame rf1 with respect to the world reference frame n using the triads of rf2. It directly differentiate the angular velocity. Ex) w=HurGetAngularAcc[b,d]";
-HurGetRelativeDCM::usage="HurGetRelativeDCM[rf1_, rf2_] returns the direction cosine matrix of rf1 with respect to rf2. It is also equivalent to the rotation matrix of rf1 with respect to rf2.Ex) dcm=HurGetRelativeDCM[b,c]";
-HurGetRelativeDCMDyadic::usage="HurGetRelativeDCMDyadic[rf1_, rf2_] returns the rotation dyadics for rf1 with respect to rf2. (vec in rf2)=(HurGetRelativeDCMDyadic[rf1_, rf2_]) dot (vec in rf1) ";
+HurGetRelativeDCM::usage="HurGetRelativeDCM[rf1_, rf2_] returns the direction cosine matrix between rf1 and rf2. It is also equivalent to the rotation matrix of rf1 with respect to rf2. Ex) dcm=HurGetRelativeDCM[b,c]";
 HurUnifyTriadPool::usage="HurUnifyTriadPool[rf1_, rf2_] returns triads for rf1 expressed in terms of rf2. In other words, it returns the x,y,z axes of rf1 expressed in terms of rf2. Note that when rf1 is defined via HurDefineRF and HurDefineDCM, rf1 is expressed in terms of Newtonian reference frame. This is used only for the internal computation purpose. It is also equivalent to HurGetRelativeDCM[rf1_, rf2_]. Ex) HurUnifyTriadPool[a, b]";
 HurUnifyTriads::usage="HurUnifyTriads[v_, rf_] is used to represent the given vector with respect to rf. Ex) HurUnifyTriads[v, b]";
 HurUnifyTriadsCoord::usage="HurUnifyTriadsCoord[v_, rf_] is used to display the coordinates of the given vector with respect to rf. Ex) HurUnifyTriadsCoord[v, b]";
 HurCoordTriads::usage="HurCoordTriads[coord__] is used to represent the coordinate into the vector form. HurCoordTriads[coord_]: coord contains the 4 elements. The first 3 are the vector coordinates and the 4th element is RF. Ex) If v=x n1 + y n2 + z n3, then coord={x,y,z,n}. The following is also possible. HurCoordTriads[coord_,RF]: If v=x n1 + y n2 + z n3, then coord={x,y,z}, and RF=n";
 HurCross::usage="HurCross[v1_, v2_, rf_] is used to perform the cross product of the two vectors. v1 and v2 can be in different RFs. The result of the cross product will be expressed as a vector with respect to rf. Ex) HurCross[v1, v2, b]";
-HurDot::usage="HurDot[v1_, v2_] is used to perform the dot product of the two vectors. v1 and v2 can be in different RFs. Also, HurDot does not require RF information since the output is a scalar. It computes dot product between dyadics, vectors, coordiates Ex) HurDot[v1, v2]";
-HurDotSimple::usage="HurDotSimple[v1_, v2_] is the subroutine that HurDot uses. HurDotSimple[] is the leaf node. It computes dot product between vectors.";
-HurFindFirstTriad::usage="HurFindFirstTriad[vec_] finds the first triad in the vec. For example, HurFindFirstTriad[r*b1+2*c1] will return the index of either b1 or c1 whatever that comes first in the HurGlobalListTriads.";
+HurDot::usage="HurDot[v1_, v2_] is used to perform the dot product of the two vectors. v1 and v2 can be in different RFs. Also, HurDot does not require RF information since the output is a scalar. Ex) HurDot[v1, v2]";
 HurNorm::usage="HurNorm[v__] returns the norm of the vector. HurNorm[v] first convert v into n, then returns norm of v. HurNorm[v,b] converts v into b and returns norm of v. If your vector is already expressed in b, then please use HurNorm[v,b]. Vector v can have triads of mixed RFs. Also, note that both will return the same norm. You may need to run Simplify"
 HurNormSqure::usage="HurNormSqure[v_] returns the norm squared of the vector. Vector v can have triads of mixed RFs."
 HurCrossCoord::usage="HurCrossCoord[v1_, v2_, rf_] is used to perform the cross product of the two vectors. v1 and v2 can be in different RFs. The result of the cross product will be expressed as a coordinate with respect to rf. It is equivalent to the following: HurUnifyTriadsCoord[ HurCross[v1_, v2_, rf_], rf_] Ex) HurCrossCoord[v1, v2, b]";
 HurVectorDiff::usage="HurVectorDiff[v_,rf1_,rf2_] is used to perform the vector differentiation. Vector v will be differentiated with respect to rf1. This function uses the vector differentiation formula for different RFs (i.e., rf2). Note that if a vector is differentiated w.r.t. time, then it will be the same as HurVectorDiff[v_,n,rf2_].";
-HurList2Column::usage="HurList2Column[list__] converts list to a column vector so that matrix multiplication can be performed."
 HurAppendRF2Coord::usage="HurAppendRF2Coord[coord_, rf_] explicitly specify the RF information to the given coordinate (i.e., 3 numbers) without RF. Regardless of the size of coord_, HurAppendRF2Coord[coord_, rf_] takes the first 3 components of coord_ and attach rf_ to it. Usually, this function is used for internal usage.";
-HurGetCongruenceTransform::usage="HurGetCongruenceTransform[mat_,level_:1]";
 HurDefineForces::usage="HurDefineForces[rf_, force_, r_] assigns the force to the RF rf at the position r. r vector is relative to the COM of RF rf.";
 HurResetForces::usage="HurResetForces[] resets all forces."
 HurDefineMoments::usage="HurDefineMoments[rf_, moment_] assigns the moment to the RF rf";
@@ -224,9 +198,9 @@ HurMakeSymmetricMatrix::usage="HurMakeSymmetricMatrix[list_]";
 HurMatrixVectorProduct::usage="HurMatrixVectorProduct[mat_,vec_,rf_]"
 HurMatrixVectorProductTriads::usage="HurMatrixVectorProductTriads[mat_,vec_,rf_]"
 HurDefineGeneralizedCoordinates::usage="HurDefineGeneralizedCoordinates[f__]";
-HurELEquation::usage="HurELEquation[] computes the EL equations via automatic procedure. It internally computes LinearMomentum, AngularMomentum, Lagrangian, and the subsequent EL Equations. From the EL Equations, M-C-G Matrices are computed. If you want to simply apply EL equations given the Lagrangian, please use HurGetELEquation[] instead.";
-HurELEquation1::usage="HurELEquation1[] computes the EL equations via automatic procedure. Unlike HurELEquation[], HurELEquation1[] does not differentiate Lagrangian directly. HurELEquation1[] computes i) Inertia matrix directly from the structure of the Kinetic Energy, ii) C matrix from Christoffel symbols, and iii) G vector from (gravitational and spring) potential energies and rayleigh dissipation energy. From the M-C-G matrices, EL equations are reconstructed backward via robotic equation.";
-HurGetELEquationFromLagrangian::usage="(obsolete) HurGetELEquationFromLagrangian[] computes the EL equations from the user-provided Lagrangian. Make sure that you have HurGlobalLagrangian defined. Otherwise, please run HurSetLagrangian[lag, gc] first. This function is equivalent to HurGetELEquation[]. Please use HurGetELEquation[] instead.";
+HurELEquation::usage="HurELEquation[] computes the EL equations via automatic procedure.";
+HurELEquation1::usage="HurELEquation1[] computes the EL equations via automatic procedure.";
+HurGetELEquationFromLagrangian::usage="HurGetELEquationFromLagrangian[] computes the EL equations from the user-provided Lagrangian. Make sure that you have HurGlobalLagrangian defined. Otherwise, please run HurSetLagrangian[lag, gc] first.";
 HurDefineConstraints::usage="HurDefineConstraints[con__]";
 HurDefineConstrainedJacobian::usage="HurDefineConstrainedJacobian[]";
 HurConstrainedELEquation::usage="HurConstrainedELEquation[]";
@@ -234,22 +208,11 @@ HurConstrainedELInverse::usage="HurConstrainedELInverse[]";
 HurELInverse::usage="HurELInverse[]";
 HurDefineLambda::usage="HurDefineLambda[]";
 HurDefineNonConservativeForces::usage="HurDefineNonConservativeForces[f__]"; 
-HurResetNonConservativeForces::usage="HurResetNonConservativeForces[]"; 
 HurDefineOtherPotentialE::usage="HurDefineOtherPotentialE[rf_, pe_] accepts the additional potential energy other than gravity in Lagrangian mechanics. Example includes spring. If intrinsic generalized coordinates (e.g., joint angles) are used, elastic energy will be uniquely assigned to a RF. However, if your GC's are extrinsic, then assignment of elastic energy to an RF is ambiguous. However, it doesn't matter since we simply need the total sum of the elastic energies. Therefore, simply assign the elastic energy to an any reasonable RF."; 
 HurDefineRayleighDissipationE::usage="HurDefineRayleighDissipationE[rf_, de_] accepts the velocity-proportional frictional forces in Lagrangian mechanics. Example includes viscous damping friction."; 
 HurGetInertiaTensor::usage="HurGetInertiaTensor[rf_]"; 
 HurProductMatVec::usage="HurProductMatVec[mat_,vec_,rf_]"; 
-HurDefineGeneralizedMomentumSymbol::usage="HurDefineGeneralizedMomentumSymbol[] defines the symbols for the generalized momenta. Please make sure that generalied coordinates are defined beforehand. The numbers of generalized momenta and generalized coordinates are the same."; 
-HurDefineGeneralizedMomentumExpression::usage="HurDefineGeneralizedMomentumExpression[] returns the expression of the generalized momentum as defined by the partial derivative of Lagrangian with first time derivative of the generalized coordinates."; 
-HurGetHamiltonian::usage="HurGetHamiltonian[] returns the Hamiltonian in terms of both q and p."; 
-HurHamiltonEquation::usage="HurHamiltonEquation[] returns the Hamilton canonical equations."; 
-HurConstrainedHamiltonEquation::usage="HurConstrainedHamiltonEquation[]"; 
-HurDefineGeneralizedSpeeds::usage="HurDefineGeneralizedSpeeds[gs__] defines the generalized speeds for Kane's method"; 
-HurDefineDependentGeneralizedSpeeds::usage="HurDefineDependentGeneralizedSpeeds[gs__]";
-HurGetSimpleNonholonomicGeneralizedSpeedsJacobian::usage="HurGetSimpleNonholonomicGeneralizedSpeedsJacobian[]"
-HurDefineDyadic::usage="HurDefineDyadic[data__] defines a dyadic. Make sure that data__ includes 11 inputs: 9 values, and 2 reference frames. 9 values correspond to the outer product of the 2 reference frames.";
-HurDefineUnitDyadic::usage="HurDefineUnitDyadic[rf_]";
-HurTransposeDyadic::usage="HurTransposeDyadic[data__] transposes the provided dyadic.";
+HurDefineGeneralizedSpeedsConstraints::usage="HurDefineGeneralizedSpeedsConstraints[gs__] defines the generalized speeds for Kane's method"; 
 HurDHTable::usage="HurDHTable[dh_]";
 HurDHInertia::usage="HurDHInertia[data_]";
 HurSimplifyVariablesTimed::usage="HurSimplifyVariablesTimed[var_,time_] simplifies all the elements of the provided var_ within the provided time_ for each element. If timed out, it will return its original expression"; 
@@ -257,14 +220,11 @@ HurFullSimplifyVariablesTimed::usage="HurFullSimplifyVariablesTimed[var_,time_] 
 HurDumpSaveData::usage="HurDumpSaveData[filename__] Please use .mx for the extension of the filename. It will save variables in binary (unreadable) expression, is very fast to load (with large data). However, this binary data are platform-specific. If saved in Mac, it cannot be used in Windows or Linux.";
 HurSaveData::usage="HurSaveData[filename__]. Please use .m for the extension of the filename. It will save variables in (readable) portable expression (or ascii format), is very slow to load (with large data). This data are platform-independent. You can use in any platforms.";
 HurLoadData::usage="HurLoadData[filename_]";
-HurToJulia::usage="HurToJulia[exp_]";
-HurToPython::usage="HurToPython[exp_]";
-HurToMatlab::usage="HurToMatlab[exp_]";
+
 
 HurInitialize[] := (  
   HurGlobalRF = {Global`n};
   HurGlobalDCM = List[RotationMatrix[0, {0, 0, 1}]]; HurGlobalMass={1}; HurGlobalInertia={{1,0,0,1,0,1}};
-  HurGlobalInertiaDyadic={{1,0,0,0,1,0,0,0,1,Global`n,Global`n}};
   HurGlobalForce = {}; HurGlobalMoment = {}; HurGlobalCOMPos = {0}; HurGlobalCOMVel = {0}; HurGlobalCOMAcc = {0};
   HurGlobalAngularVel = {0}; HurGlobalAngularAcc = {0};
   HurGlobalLinearMomentum = {0}; HurGlobalAngularMomentum = {0}; HurGlobalVertical = {0};
@@ -279,15 +239,11 @@ HurInitialize[] := (
   HurGlobalListTriads = {{n1,n2,n3}}; 
   HurGlobalTriadsConversion = {{n1->n1,n2->n2,n3->n3}};
   (*HurGlobalTriadsConversion = {0};*)
-  HurGlobalSimplify = True; HurGlobalGeneralizedSpeedsExpression = {};
-  HurGlobalGeneralizedSpeedsSymbol = {}; HurGlobalKaneEquation = {0};
-  HurGlobalTemp = {0}; HurGlobalDependentGeneralizedSpeeds = {0};
-  HurGlobalGC2GS = {0}; HurGlobalConstraintsGS = {0};
-  HurGlobalGSConstrainedJacobian = {0};
+  HurGlobalSimplify = True; HurGlobalGeneralizedSpeedsConstraints = {};
+  HurGlobalGeneralizedSpeeds = {}; HurGlobalKaneEquation = {0};
+  HurGlobalTemp = {0}; 
   HurGlobalAngularVelAbs = {0}; HurGlobalAngularVelRel = {{0,0,0}};
   HurGlobalDHTable = {0}; HurGlobalDHInertia = {0}; HurGlobalDHOrigin = {0};
-  HurGlobalGeneralizedMomentumSymbol = {}; HurGlobalGeneralizedMomentumExpression = {};
-  HurGlobalHamiltonian = {0}; HurGlobalHamiltonEquation = {{0},{0}};
 )
 
 Begin["`Private`"];
@@ -305,7 +261,6 @@ HurDefineRF[rf__] := (rfs=List[rf];narg=Length[rfs];
         HurDefineDCM[ rfs[[i]] ,RotationMatrix[0, {0, 0, 1}] ];
         AppendTo[HurGlobalMass, 0];
         AppendTo[HurGlobalInertia, {0,0,0,0,0,0}];
-        AppendTo[HurGlobalInertiaDyadic, {0,0,0,0,0,0,0,0,0,rfs[[i]],rfs[[i]]}];
         AppendTo[HurGlobalAngularVel, 0];
         AppendTo[HurGlobalAngularAcc, 0];
         AppendTo[HurGlobalAngularVelAbs, "NA"];
@@ -509,14 +464,8 @@ HurGetLinearCOMAcc[rf1_,rf2_] := (
 HurGetRelativeDCM[rf1_, rf2_] := (Rot1=HurGlobalDCM[[ HurGetIndexGlobalRF[rf1] ]];
 	Rot2=HurGlobalDCM[[HurGetIndexGlobalRF[ rf2 ] ]];
   Rot3=Transpose[Rot2].Rot1;
-	Rot3=If[HurGlobalSimplify, Simplify[Rot3], Rot3];
-  Rot3
+	If[HurGlobalSimplify, Simplify[Rot3], Rot3]
 	)
-
-HurGetRelativeDCMDyadic[rf1_, rf2_] := (
-  rot=HurGetRelativeDCM[rf1, rf2];
-  HurDefineDyadic[rot, rf2, rf1]
-  )
 
 HurUnifyTriads[v_, rf_] := (
   (*
@@ -555,72 +504,9 @@ HurCross[v1_, v2_, rf_] := (coord = Cross[HurUnifyTriadsCoord[v1, rf][[1;;3]], H
   HurCoordTriads[ Flatten[ List[coord1,rf] ] ]
   )  
 
-HurFindFirstTriad[vec_] := (
-  First@SparseArray[Coefficient[vec, HurGlobalListTriads]]["NonzeroPositions"]
+HurDot[v1_, v2_] := (tempD=Dot[HurUnifyTriadsCoord[v1, HurGlobalRF[[1]] ][[1;;3]], HurUnifyTriadsCoord[v2, HurGlobalRF[[1]] ][[1;;3]]];
+  If[HurGlobalSimplify, Simplify[tempD], tempD]
   )
-
-HurDotSimple[v1_, v2_] := (
-  If[v1===0 || v2===0
-    ,
-    tempAns=0;
-    ,
-    If[MemberQ[Flatten[HurGlobalListTriads],v1]  (* simple vector. e.g. b1 *)
-      ,
-      tempPos=Flatten[Position[HurGlobalListTriads, v1]];
-      tempAns=HurUnifyTriadsCoord[v2, HurGlobalRF[[ tempPos[[1]] ]]][[ tempPos[[2]] ]];
-      ,
-      If[MemberQ[Flatten[HurGlobalListTriads],v2]  (* simple vector. e.g. b1 *)
-        ,
-        tempPos=Flatten[Position[HurGlobalListTriads, v2]];
-        tempAns=HurUnifyTriadsCoord[v1, HurGlobalRF[[ tempPos[[1]] ]]][[ tempPos[[2]] ]];
-        ,
-        tempPos=HurFindFirstTriad[v1];
-        tempD = Dot[HurUnifyTriadsCoord[v1,HurGlobalRF[[ tempPos[[1]] ]]][[1 ;; 3]], 
-        HurUnifyTriadsCoord[v2, HurGlobalRF[[ tempPos[[1]] ]]][[1 ;; 3]]]; 
-        tempAns = If[HurGlobalSimplify, Simplify[tempD], tempD];
-        ];
-      ];
-    ];
-  tempAns
-  )
-
-HurDot[v1_, v2_] := (
-  Switch[Length[Flatten[List[v1]]]*Length[Flatten[List[v2]]],
-   1, tempAns=HurDotSimple[v1,v2];,
-   4, If[Length[Flatten[List[v1]]] === 1, 
-     tempAns = HurDot[v1, HurCoordTriads[v2]], 
-     tempAns = HurDot[HurCoordTriads[v1], v2]];,
-   11, If[Length[Flatten[List[v1]]] === 11,
-     data = ArrayReshape[v1[[1 ;; 9]], {3, 3}];
-     tempAns = Total[Flatten[Table[ If[data[[j,i]]===0,0,data[[j,i]]*
-          HurDot[HurGlobalListTriads[[HurGetIndexGlobalRF[v1[[11]]],i]],v2]*
-          HurGlobalListTriads[[HurGetIndexGlobalRF[v1[[10]]],j]] ],{j,3}, {i, 3}]]];,
-     data = ArrayReshape[v2[[1 ;; 9]], {3, 3}];
-     tempAns = Total[Flatten[Table[ If[data[[j,i]]===0,0,data[[j,i]]*
-          HurDot[v1,HurGlobalListTriads[[HurGetIndexGlobalRF[v2[[10]]],j]]]*
-          HurGlobalListTriads[[HurGetIndexGlobalRF[v2[[11]]],i]] ],{j,3},{i,3}]]];];,
-   16, tempAns = HurDot[HurCoordTriads[v1],HurCoordTriads[v2]];,
-   44, If[Length[Flatten[List[v1]]] === 11, 
-     data = ArrayReshape[v1[[1 ;; 9]], {3, 3}];
-     tempAns = Total[Flatten[Table[ If[data[[j,i]]===0,0,data[[j,i]]*
-          HurDot[HurGlobalListTriads[[HurGetIndexGlobalRF[v1[[11]]],i]],HurCoordTriads[v2]]*
-          HurGlobalListTriads[[HurGetIndexGlobalRF[v1[[10]]],j]] ],{j,3},{i, 3}]]];, 
-     data = ArrayReshape[v2[[1 ;; 9]], {3, 3}];
-     tempAns = Total[Flatten[Table[ If[data[[j,i]]===0,0,data[[j,i]]*
-          HurDot[HurCoordTriads[v1],HurGlobalListTriads[[HurGetIndexGlobalRF[v2[[10]]],j]]]*
-          HurGlobalListTriads[[HurGetIndexGlobalRF[v2[[11]]],i]] ],{j,3},{i,3}]]];];,
-   121, tempAns=Flatten[List[Table[Total[Flatten[Table[
-    v1[[i + 3*(k - 1)]]*v2[[3*j - 3 + l]]*
-     HurDot[HurGlobalListTriads[[HurGetIndexGlobalRF[v1[[11]]], i]], 
-      HurGlobalListTriads[[HurGetIndexGlobalRF[v2[[10]]], j]]], {i, 
-     3}, {j, 3}]]], {k, 3}, {l, 3}],v1[[10]],v2[[11]]]]];
-  tempAns = If[HurGlobalSimplify, Simplify[tempAns], tempAns];
-  tempAns
-  )
-
-
-
-
 
 HurCrossCoord[v1_, v2_, rf_] := 
  (temp=Cross[HurUnifyTriadsCoord[v1, rf][[1;;3]], HurUnifyTriadsCoord[v2, rf][[1;;3]]];
@@ -686,36 +572,10 @@ HurKinematics[] := (nrfs=HurGetNumGlobalRF[];
     ]
   )
 
-HurList2Column[list__] := (
-  ls=Flatten[List[list]];
-  nls=Length[ls];
-  ArrayReshape[ls, {nls, 1}]
-  )
 
 
-HurGetCongruenceTransform[mat_] := (
-  dim=Dimensions[mat];
-  n=dim[[1]];
-  level=1;
-  Tcumul=IdentityMatrix[n];
-  mat1=mat;
-  If[dim[[1]]!=dim[[2]],
-    Print["The matrix must be square matrix!"];
-    Tcumul=Null;
-    ,
-    For[level = 1, level < n, level++,
-      T=IdentityMatrix[n];
-      Do[
-        T[[level,i+1]]=-mat1[[level,i+1]]/mat1[[level,level]];
-        ,
-        {i,level,n-1}
-        ];
-        mat1=Transpose[T].mat1.T;
-        Tcumul=Tcumul.T;
-      ];
-    ];
-  List[Tcumul,mat1]
-  )
+
+
 
 
 
@@ -729,8 +589,8 @@ HurProductMatVec[mat_,vec_,rf_] := (ww=HurUnifyTriadsCoord[vec,rf];
 
 
 HurGetInertiaTensor[rf_] := (IItemp=HurGlobalInertia[[ HurGetIndexGlobalRF[rf] ]];
-  {{IItemp[[1]],IItemp[[2]],IItemp[[3]]},{IItemp[[2]],IItemp[[4]],IItemp[[5]]},{IItemp[[3]],IItemp[[5]],IItemp[[6]]}}
-  )
+  II={{IItemp[[1]],IItemp[[2]],IItemp[[3]]},{IItemp[[2]],IItemp[[4]],IItemp[[5]]},{IItemp[[3]],IItemp[[5]],IItemp[[6]]}};
+  II)
 
 HurGetAngularMomentum[rf1_, rf2_] := (II=HurGetInertiaTensor[rf1];
   ww=HurUnifyTriadsCoord[HurGetAngularVel[rf1,rf1],rf1];
@@ -754,17 +614,15 @@ HurDefineVertical[v_] := (HurGlobalVertical[[1]]=v;)
 
 HurDefineMass[rf_, m_] := (HurGlobalMass[[ HurGetIndexGlobalRF[ rf ] ]] = m;)
 
-HurDefineInertia[rf_, II_] := (HurGlobalInertia[[HurGetIndexGlobalRF[ rf ] ]] = II;
-  HurGlobalInertiaDyadic[[HurGetIndexGlobalRF[ rf ] ]]={II[[1]],II[[2]],II[[3]],II[[2]],II[[4]],II[[5]],II[[3]],II[[5]],II[[6]],rf,rf };
-  )
+HurDefineInertia[rf_, II_] := (HurGlobalInertia[[HurGetIndexGlobalRF[ rf ] ]] = II;)
 
 HurDefineForces[rf_, force_, r_] := (AppendTo[HurGlobalForce,{rf,force,r}];)
 
-HurResetForces[] := (HurGlobalForce={};)
+HurResetForces[] := (HurGlobalForce={})
 
 HurDefineMoments[rf_, moment_] := (AppendTo[HurGlobalMoment,{rf,moment}];)
 
-HurResetMoments[] := (HurGlobalMoment={};)
+HurResetMoments[] := (HurGlobalMoment={})
 
 HurNEResultantForce[rf1_, rf2_] := HurUnifyTriads[Total[Table[HurGlobalForce[[i]][[2]],{i,Flatten[Position[HurGlobalForce[[;;,1]],rf1]] } ] ],rf2]
 
@@ -953,11 +811,6 @@ HurDefineNonConservativeForces[f__] := (
   HurGlobalNonConservativeForces
   )
 
-HurResetNonConservativeForces[] := (
-  ngcs=Length[HurGlobalNonConservativeForces];
-  HurGlobalNonConservativeForces=Table[0, {i, ngcs}];
-  )
-
 HurGetKineticE[rf__] := (rfs=Flatten[List[rf]];narg=Length[rfs];
   Do[
     temp=1/2*HurGlobalMass[[ HurGetIndexGlobalRF[ rfs[[i]] ] ]] * HurDot[ HurGlobalCOMVel[[ HurGetIndexGlobalRF[ rfs[[i]] ] ]], HurGlobalCOMVel[[ HurGetIndexGlobalRF[ rfs[[i]] ] ]] ]+1/2*HurDot[ HurGlobalAngularVel[[ HurGetIndexGlobalRF[ rfs[[i]] ] ]],HurGlobalAngularMomentum[[ HurGetIndexGlobalRF[ rfs[[i]] ] ]] ];
@@ -1050,8 +903,7 @@ HurGetELEquationFromLagrangian[] := (gcs=HurGlobalGeneralizedCoordinates;ngcs=Le
   HurGlobalELEquation
   )
 
-HurGetELEquation[gc__] := (
-  gcs=Flatten[ List[gc] ];ngcs=Length[gcs];
+HurGetELEquation[gc__] := (gcs=Flatten[ List[gc] ];ngcs=Length[gcs];
   L=Total[HurGlobalLagrangian];
   DE=Total[ HurGlobalRayleighDissipationE ];
   
@@ -1068,7 +920,19 @@ HurGetELEquation[gc__] := (
 
 (* use this when Lagrangian is modified by users *)
 HurGetELEquation[] := (
-  HurGetELEquation[HurGlobalGeneralizedCoordinates]
+  gcs=HurGlobalGeneralizedCoordinates;ngcs=Length[gcs];
+  L=Total[HurGlobalLagrangian];
+  DE=Total[ HurGlobalRayleighDissipationE ];
+  
+  Do[ 
+    temp = D[ D[ L, D[gcs[[i]], Global`t] ], Global`t ] - D[ L , gcs[[i]] ] + D[ DE, D[gcs[[i]], Global`t] ] - HurGlobalNonConservativeForces[[i]];
+    temp=If[HurGlobalSimplify, Simplify[temp], temp];
+    HurGlobalELEquation[[ Position[ HurGlobalGeneralizedCoordinates,gcs[[i]] ][[1]][[1]] ]] = temp;
+    temp
+    , 
+    {i,ngcs} 
+    ];
+  HurGlobalELEquation
   )
 
 (*
@@ -1242,20 +1106,19 @@ HurGetMMatrix[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Le
   )
 
 HurGetMMatrix1[] := (
-  nrfs=HurGetNumGlobalRF[];
+  gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Length[gcs];
   tempM=
   	Table[ 
-      Jac=HurGetJacobian[ HurGlobalCOMPos[[i]], HurGlobalRF[[i]], HurGlobalRF[[1]] ];
- 	    Jacv=Jac[[1;;3,;;]];
- 	    Jacw=Jac[[4;;6,;;]];
- 	    temp1=HurGlobalMass[[i]]*Transpose[Jacv].Jacv;
- 	    rot=HurGetRelativeDCM[ HurGlobalRF[[i]],HurGlobalRF[[1]] ];
- 	    II=HurGetInertiaTensor[ HurGlobalRF[[i]] ];
- 	    temp2=Transpose[Jacw].rot.II.Transpose[rot].Jacw;
-      temp=temp1+temp2;
-      If[HurGlobalSimplify, Simplify[temp], temp]
-      ,{i,2,nrfs}
-      ];
+    Jac=HurGetJacobian[ HurGlobalCOMPos[[i+1]], HurGlobalRF[[i+1]], HurGlobalRF[[1]] ];
+ 	Jacv=Jac[[1;;3,;;]];
+ 	Jacw=Jac[[4;;6,;;]];
+ 	temp1=HurGlobalMass[[i+1]]*Transpose[Jacv].Jacv;
+ 	rot=HurGetRelativeDCM[ HurGlobalRF[[i+1]],HurGlobalRF[[1]] ];
+ 	II=HurGetInertiaTensor[ HurGlobalRF[[i+1]] ];
+ 	temp2=Transpose[Jacw].rot.II.Transpose[rot].Jacw;
+    temp=temp1+temp2;
+    If[HurGlobalSimplify, Simplify[temp], temp]
+    ,{i, narg}];
   HurGlobalMMatrix=Total[tempM];
   HurGlobalMMatrix
   )
@@ -1297,7 +1160,7 @@ HurDefineConstraints[con__] := (cons=Flatten[ List[ con ] ];ncon=Length[ cons ];
   HurGlobalConstraints
   )
 
-HurResetConstraints[] := (HurGlobalConstraints={};)
+HurResetConstraints[] := (HurGlobalConstraints={})
 
 
 HurDefineConstrainedJacobian[] := (m=Length[HurGlobalConstraints];n=Length[HurGlobalGeneralizedCoordinates];
@@ -1339,123 +1202,19 @@ HurDefineGeneralizedCoordinates[gc__] := (gcs=Flatten[ List[ gc ] ]; ngcs=Length
   HurGlobalConstrainedELEquation=Table[0,{i,ngcs}];
   )
 
-(* Hamiltonian mechanics *)
-HurDefineGeneralizedMomentumSymbol[] :=(
-  ngcs=Length[HurGlobalGeneralizedCoordinates];
-  HurGlobalGeneralizedMomentumSymbol=Table[ ToExpression["p" <> ToString[i] <> "[t]" ] ,{i,ngcs} ];
-  )
-
-HurDefineGeneralizedMomentumExpression[] :=(
-  ngcs=Length[HurGlobalGeneralizedCoordinates];
-  HurGetLagrangian[];
-  L = Total[HurGlobalLagrangian];
-  temp=Table[
-    qdot=D[HurGlobalGeneralizedCoordinates[[i]],Global`t];
-    D[L,qdot]
-    ,
-    {i,ngcs}
-    ];
-  HurGlobalGeneralizedMomentumExpression=If[HurGlobalSimplify, Simplify[temp], temp]
-  )
-
-HurGetHamiltonian[] :=(
-  HurGetMMatrix1[];
-  qdot=LinearSolve[HurGlobalMMatrix,HurGlobalGeneralizedMomentumSymbol];
-  temp = 1/2 HurGlobalGeneralizedMomentumSymbol.qdot + Total[HurGlobalPotentialE];
-  HurGlobalHamiltonian=If[HurGlobalSimplify, Simplify[temp], temp]
-  )
-
-HurHamiltonEquation[] :=(
-  HurDefineGeneralizedMomentumSymbol[];
-  HurDefineGeneralizedMomentumExpression[];
-  HurGetHamiltonian[];
-
-  temp1=Grad[HurGlobalHamiltonian, HurGlobalGeneralizedMomentumSymbol];
-  HurGlobalHamiltonEquation[[1]]=If[HurGlobalSimplify, Simplify[temp1], temp1];
-  temp2=-Grad[HurGlobalHamiltonian, HurGlobalGeneralizedCoordinates]+HurGlobalNonConservativeForces;
-  HurGlobalHamiltonEquation[[2]]=If[HurGlobalSimplify, Simplify[temp2], temp2];
-  HurGlobalHamiltonEquation
-  )
-
-HurConstrainedHamiltonEquation[] :=(
-  HurHamiltonEquation[];
-  HurDefineConstrainedJacobian[];
-  HurDefineLambda[];
-  m=Length[HurGlobalLambda];
-  HurGlobalGeneralizedConstrainingForce=Transpose[HurGlobalConstrainedJacobian].HurGlobalLambda;
-  HurGlobalHamiltonEquation[[2]]=HurGlobalHamiltonEquation[[2]]+HurGlobalGeneralizedConstrainingForce;
-  HurGlobalHamiltonEquation
-  )
-  
 (* Kane Method *)
-HurDefineGeneralizedSpeeds[gs__] := (gss=Flatten[ List[ gs ] ]; ngss=Length[gss];
-  HurGlobalGeneralizedSpeedsExpression=gss;
+HurDefineGeneralizedSpeedsConstraints[gs__] := (gss=Flatten[ List[ gs ] ]; ngss=Length[gss];
+  HurGlobalGeneralizedSpeedsConstraints=gss;
   HurGlobalKaneEquation=Table[0,{i,ngss}];
 
-  HurGlobalGeneralizedSpeedsSymbol=Table[ ToExpression["u" <> ToString[i] <> "[t]" ] ,{i,ngss} ];
+  HurGlobalGeneralizedSpeeds=Table[ ToExpression["u" <> ToString[i] <> "[t]" ] ,{i,ngss} ];
   (* Global`t *)
 
-  ngcs=Length[HurGlobalGeneralizedCoordinates];
+  ngcs=Length[HurGlobalGeneralizedCoordinates]
   (* ngcs-ngss is the number of nonholonomic constraints *)
 
-  // HurDefineConstrainedJacobian[];
-  eq=Table[HurGlobalGeneralizedSpeedsExpression[[i]]==HurGlobalGeneralizedSpeedsSymbol[[i]],{i,ngcs}];
-  GCDot=D[HurGlobalGeneralizedCoordinates,Global`t];
-  HurGlobalGC2GS=Flatten[Solve[eq,GCDot]];
+
   )
-
-HurDefineDependentGeneralizedSpeeds[gs__] := (
-  HurGlobalDependentGeneralizedSpeeds=Flatten[ List[ gs ] ];
-  )
-
-HurGetSimpleNonholonomicGeneralizedSpeedsJacobian[] := (
-  ncon=Length[HurGlobalConstraints];
-  ndgs=Length[HurGlobalDependentGeneralizedSpeeds];
-  GSDepIndex=Flatten[Table[Position[HurGlobalGeneralizedSpeedsSymbol, HurGlobalDependentGeneralizedSpeeds[[i]]],{i,ndgs}],1];
-  GSIndep=Delete[HurGlobalGeneralizedSpeedsSymbol,GSDepIndex];
-
-  HurGlobalConstraintsGS=Flatten[HurGlobalConstraints/.HurGlobalGC2GS];
-  eq=Table[HurGlobalConstraintsGS[[i]] == 0, {i, ncon}];
-  ans=Flatten[Solve[eq,HurGlobalDependentGeneralizedSpeeds]];
-
-  HurGlobalGSConstrainedJacobian=Table[
-    temp=HurGlobalDependentGeneralizedSpeeds[[i]]/.ans;
-    Grad[temp,GSIndep]
-    ,
-    {i,ndgs}
-    ];
-  HurGlobalGSConstrainedJacobian
-  )
-
-HurDefineDyadic[data__] := (
-  datavec=Flatten[ List[ data ] ];
-  ndata=Length[datavec];
-  If[ndata===11,
-    temp=datavec;
-    ,
-    Print["You entered wrong data. Returning zero dyadic."]
-    temp={0,0,0,0,0,0,0,0,0,n,n};
-    ];
-  temp
-  )
-
-HurDefineUnitDyadic[rf_] := (
-  HurDefineDyadic[1,0,0,0,1,0,0,0,1,rf,rf]
-  )
-
-HurTransposeDyadic[data__] := (
-  datavec=Flatten[ List[ data ] ];
-  ndata=Length[datavec];
-  If[ndata===11,
-    elem=Flatten[Transpose[ArrayReshape[datavec[[1;;9]],{3,3}]]];
-    temp=Flatten[List[elem,datavec[[11]],datavec[[10]]]];
-    ,
-    Print["The argument you entered is not in the right format for dyadics. No changes happened."]
-    temp=datavec;
-    ];
-  temp
-  )
-
 
 (*
   identify all nonholonomic constraints
@@ -1611,351 +1370,6 @@ HurDumpSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Leng
 HurLoadData[filename_] := (
   Get[filename];
   )
-
-
-
-
-
-JuliaForm[Rational[a_, b_]] := JuliaForm[a] <> "/" <> JuliaForm[b];
-JuliaForm[Complex[a_, b_]] := "(" <> JuliaForm[a] <> "+" <> JuliaForm[b] <> "im" <> ")";
-JuliaForm[Times[a_, b_]] := JuliaForm[a] <> "*" <> JuliaForm[b];
-JuliaForm[Plus[a_, b_]] := "(" <> JuliaForm[a] <> "+" <> JuliaForm[b] <> ")";
-(* Most of the commands starting with Capital letter will be lowered. 
-  Ex: Sin[xxx] -> sin(xxx). Note that q1[t] -> q1 for simulation purpose. 
-  In HurToolbox, only generalized coordinates and generalized momenta are 
-  functions of time. For simulation purpose, the [t] from q1[t], p1[t] 
-  will be removed. This treatment is only for the combination of HurToolbox 
-  and other numerical packages (e.g., Julia). 
-*)
-JuliaForm[h_[args__]] := If[JuliaForm[args] === "t", JuliaForm[h], 
-    ToLowerCase[JuliaForm[h]] <> "(" <> JuliaForm[args] <> ")"];
-(* treat Exp -> exp and Sqrt -> sqrt. All other Power will be treated as ()^() *)
-JuliaForm[Power[a_, b_]] := If[JuliaForm[b] === "1/2", 
-    "sqrt" <> "(" <> JuliaForm[a] <> ")", 
-    If[JuliaForm[a] === "exp(1)", 
-      "(" <> "exp" <> "(" <> JuliaForm[b] <> ")", 
-      "(" <> JuliaForm[a] <> ")" <> "^" <> "(" <> JuliaForm[b] <> ")"]];
-JuliaForm[a_ListQ] := StringReplace[ToString[a], 
-    {"}," -> "];", "{" -> "[", "}}" -> "]]", "," -> " "}];
-JuliaForm[Derivative[a_][b_]] := Switch[a, 1, JuliaForm[b] <> "d", 
-    2, JuliaForm[b] <> "dd", 3, JuliaForm[b] <> "ddd"];
-(*
-  JuliaForm[Sin]:="sin";
-  JuliaForm[Cos]:="cos";
-  JuliaForm[Tan]:="tan";
-  JuliaForm[Csc]:="csc";
-  JuliaForm[Sec]:="sec";
-  JuliaForm[Cot]:="cot";
-  JuliaForm[Sinh]:="sinh";
-  JuliaForm[Cosh]:="cosh";
-  JuliaForm[Tanh]:="tanh";
-  JuliaForm[Csch]:="csch";
-  JuliaForm[Sech]:="sech";
-  JuliaForm[Coth]:="coth";
-  JuliaForm[Exp]:="exp";
-*)
-(* Handling arrays *)
-(*
-JuliaForm[List[args__]] := "(" <> "[" <> Table[JuliaForm[{args}[[ii]]] <> " ", 
-  {ii, 1, Length@{args}}] <> "]" <> ")";
-*)
-JuliaForm[List[args__]] := (
-  Switch[ Length[Dimensions[List[args]]],
-    1,
-    temp="["<> Table[JuliaForm[List[args][[i]]]<>" ",{i,Length[List[args]]}] <>"]",
-    2,
-    temp="["<> Table[JuliaForm[List[args][[i]]]<>";",{i,Length[List[args]]}] <>"]"
-    ];
-  temp=StringReplace[temp, {"[[" -> "[", " ];[" -> ";", " ];]" -> "]"}];
-  StringReplace[temp, {" ]" -> "]"}]
-  )
-
-(*Pi and E*)
-JuliaForm[\[Pi]] = "pi";
-JuliaForm[Pi] = "pi";
-JuliaForm[E] = "exp(1)";
-(*real numbers,engineering notation*)
-JuliaForm[r_Real] := Block[{a = MantissaExponent[r]}, 
-    If[r >= 0, ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]], 
-     "(" <> ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]] <> ")"]];
-(*Greek characters*)
-greekrule = {"\[Alpha]" -> "alpha", "\[Beta]" -> "beta", 
-    "\[Gamma]" -> "gamma", "\[Delta]" -> "delta", 
-    "\[CurlyEpsilon]" -> "curlyepsilon", "\[Zeta]" -> "zeta", 
-    "\[Eta]" -> "eta", "\[Theta]" -> "theta", "\[Iota]" -> "iota", 
-    "\[Kappa]" -> "kappa", "\[Lambda]" -> "lambda", "\[Mu]" -> "mu", 
-    "\[Nu]" -> "nu", "\[Xi]" -> "xi", "\[Omicron]" -> "omicron", 
-    "\[Pi]" -> "pi", "\[Rho]" -> "rho", 
-    "\[FinalSigma]" -> "finalsigma", "\[Sigma]" -> "sigma", 
-    "\[Tau]" -> "tau", "\[Upsilon]" -> "upsilon", 
-    "\[CurlyPhi]" -> "curlyphi", "\[Chi]" -> "chi", "\[Psi]" -> "psi",
-     "\[Omega]" -> "omega", "\[CapitalAlpha]" -> "Alpha", 
-    "\[CapitalBeta]" -> "Beta", "\[CapitalGamma]" -> "Gamma", 
-    "\[CapitalDelta]" -> "Delta", 
-    "\[CapitalEpsilon]" -> "CurlyEpsilon", "\[CapitalZeta]" -> "Zeta",
-     "\[CapitalEta]" -> "Eta", "\[CapitalTheta]" -> "Theta", 
-    "\[CapitalIota]" -> "Iota", "\[CapitalKappa]" -> "Kappa", 
-    "\[CapitalLambda]" -> "Lambda", "\[CapitalMu]" -> "Mu", 
-    "\[CapitalNu]" -> "Nu", "\[CapitalXi]" -> "Xi", 
-    "\[CapitalOmicron]" -> "Omicron", "\[CapitalPi]" -> "Pi", 
-    "\[CapitalRho]" -> "Rho", "\[CapitalSigma]" -> "Sigma", 
-    "\[CapitalTau]" -> "Tau", "\[CapitalUpsilon]" -> "Upsilon", 
-    "\[CapitalPhi]" -> "CurlyPhi", "\[CapitalChi]" -> "Chi", 
-    "\[CapitalPsi]" -> "Psi", "\[CapitalOmega]" -> "Omega"};
-(*Everything else*)
-JuliaForm[allOther_] := 
-   StringReplace[ToString[allOther, FortranForm], greekrule];
-
-HurToJulia[exp_] := (
-  CopyToClipboard[JuliaForm[exp]];
-  JuliaForm[exp]
-  )
-  
-
-
-
-
-ToPython[x_, numpyprefix_: "numpy"] := 
- Module[{expression = x, greekrule, PythonForm, 
-   numpypre = numpyprefix, lp, rp, a, 
-   b},(*FUNCTION TO CONVERT MATHEMATICA EXPRESSION TO NUMPY;
-  ----------------------------------------------------;
-  INPUT ARGUMENTS;
-  x:your mathematica expression,it can be numbers,literals,
-  complexes or lists;
-  numpy\[LetterSpace]prefix:string defining your Numpy import prefix,
-  e.g.:if your used "import numpy as np",
-  your prefix should be the string "np" if your used "from numpy \
-import *",your prefix should be the empty string "";
-  OUTPUT;
-  the Numpy python-ready expression (to be copied as a string);
-  !The formatted expression will be copied ot your clipboard,
-  ready to paste on Python!;
-  ------------------------------------------------------;
-  Not tested for every possible combination;use at your risk,
-  by Gustavo Wiederhecker*)
-  If[numpyprefix == "", sep = "", 
-   sep = "."];(*if no prefix is included,
-  the "." separator is not used*)lp = "( ";
-  rp = " )";
-  PythonForm[Rational[a_, b_]] := 
-   PythonForm[a] <> "/" <> PythonForm[b];
-  PythonForm[Complex[a_, b_]] := 
-   "complex" <> lp <> PythonForm[a] <> "," <> PythonForm[b] <> rp;
-  PythonForm[Times[a_, b_]] := PythonForm[a] <> " * " <> PythonForm[b];
-  PythonForm[Plus[a_, b_]] := 
-   lp <> PythonForm[a] <> " + " <> PythonForm[b] <> rp;
-  PythonForm[h_[args__]] := 
-   numpypre <> sep <> ToLowerCase[PythonForm[h]] <> lp <> 
-    PythonForm[args] <> rp;
-  PythonForm[Power[a_, b_]] := 
-   lp <> PythonForm[a] <> rp <> "**" <> lp <> PythonForm[b] <> rp;
-  PythonForm[a_ListQ] := 
-   numpypre <> sep <> "array" <> 
-    StringReplace[ToString[a], {"{" -> "[", "}" -> "]"}];
-  PythonForm[Arg] = numpypre <> sep <> "angle";
-  (*Some functions that are note defined in numpy*)
-  
-  PythonForm[Csc] := "1/" <> numpypre <> sep <> "sin";
-  PythonForm[Sec] := "1/" <> numpypre <> sep <> "cos";
-  PythonForm[Cot] := "1/" <> numpypre <> sep <> "tan";
-  PythonForm[Csch] := "1/" <> numpypre <> sep <> "sinh";
-  PythonForm[Sech] := "1/" <> numpypre <> sep <> "cosh";
-  PythonForm[Coth] := "1/" <> numpypre <> sep <> "tanh";
-  (*Handling arrays*)
-  
-  PythonForm[List[args__]] := 
-   numpypre <> sep <> "array" <> lp <> "[" <> 
-    Table[PythonForm[{args}[[ii]]] <> ",", {ii, 1, Length@{args}}] <> 
-    "]" <> rp;
-  (*Pi and E*)
-  PythonForm[\[Pi]] = numpypre <> sep <> "pi";
-  PythonForm[E] = numpypre <> sep <> "e";
-  (*real numbers,engineering notation*)
-  PythonForm[r_Real] := 
-   Block[{a = MantissaExponent[r]}, 
-    If[r >= 0, ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]], 
-     "(" <> ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]] <> ")"]];
-  (*Greek characters*)
-  greekrule = {"\[Alpha]" -> "alpha", "\[Beta]" -> "beta", 
-    "\[Gamma]" -> "gamma", "\[Delta]" -> "delta", 
-    "\[CurlyEpsilon]" -> "curlyepsilon", "\[Zeta]" -> "zeta", 
-    "\[Eta]" -> "eta", "\[Theta]" -> "theta", "\[Iota]" -> "iota", 
-    "\[Kappa]" -> "kappa", "\[Lambda]" -> "lambda", "\[Mu]" -> "mu", 
-    "\[Nu]" -> "nu", "\[Xi]" -> "xi", "\[Omicron]" -> "omicron", 
-    "\[Pi]" -> "pi", "\[Rho]" -> "rho", 
-    "\[FinalSigma]" -> "finalsigma", "\[Sigma]" -> "sigma", 
-    "\[Tau]" -> "tau", "\[Upsilon]" -> "upsilon", 
-    "\[CurlyPhi]" -> "curlyphi", "\[Chi]" -> "chi", "\[Psi]" -> "psi",
-     "\[Omega]" -> "omega", "\[CapitalAlpha]" -> "Alpha", 
-    "\[CapitalBeta]" -> "Beta", "\[CapitalGamma]" -> "Gamma", 
-    "\[CapitalDelta]" -> "Delta", 
-    "\[CapitalEpsilon]" -> "CurlyEpsilon", "\[CapitalZeta]" -> "Zeta",
-     "\[CapitalEta]" -> "Eta", "\[CapitalTheta]" -> "Theta", 
-    "\[CapitalIota]" -> "Iota", "\[CapitalKappa]" -> "Kappa", 
-    "\[CapitalLambda]" -> "Lambda", "\[CapitalMu]" -> "Mu", 
-    "\[CapitalNu]" -> "Nu", "\[CapitalXi]" -> "Xi", 
-    "\[CapitalOmicron]" -> "Omicron", "\[CapitalPi]" -> "Pi", 
-    "\[CapitalRho]" -> "Rho", "\[CapitalSigma]" -> "Sigma", 
-    "\[CapitalTau]" -> "Tau", "\[CapitalUpsilon]" -> "Upsilon", 
-    "\[CapitalPhi]" -> "CurlyPhi", "\[CapitalChi]" -> "Chi", 
-    "\[CapitalPsi]" -> "Psi", "\[CapitalOmega]" -> "Omega"};
-  (*Everything else*)
-  PythonForm[allOther_] := 
-   StringReplace[ToString[allOther, FortranForm], greekrule];
-  (*Copy results to clipboard*)CopyToClipboard[PythonForm[expression]];
-  PythonForm[expression]]
-
-
-PythonForm[Rational[a_, b_]] := PythonForm[a] <> "/" <> PythonForm[b];
-PythonForm[Complex[a_, b_]] := "complex" <> "(" <> PythonForm[a] <> "," <> PythonForm[b] <> ")";
-PythonForm[Times[a_, b_]] := PythonForm[a] <> "*" <> PythonForm[b];
-PythonForm[Plus[a_, b_]] := "(" <> PythonForm[a] <> "+" <> PythonForm[b] <> ")";
-PythonForm[h_[args__]] := ToLowerCase[PythonForm[h]] <> "(" <> PythonForm[args] <> ")";
-PythonForm[Power[a_, b_]] := "(" <> PythonForm[a] <> ")" <> "**" <> "(" <> PythonForm[b] <> ")";
-PythonForm[a_ListQ] := StringReplace[ToString[a], {"{" -> "[", "}" -> "]"}];
-PythonForm[Arg] = "angle";
-
-(*Some functions that are note defined in numpy*)
-PythonForm[Csc] := "1/" <> "sin";
-PythonForm[Sec] := "1/" <> "cos";
-PythonForm[Cot] := "1/" <> "tan";
-PythonForm[Csch] := "1/" <> "sinh";
-PythonForm[Sech] := "1/" <> "cosh";
-PythonForm[Coth] := "1/" <> "tanh";
-
-(*Handling arrays*)
-PythonForm[List[args__]] := "[" <> Table[PythonForm[{args}[[ii]]] <> ",", {ii, 1, Length@{args}}] <> "]";
-
-(*Pi and E*)
-PythonForm[Pi] = "pi";
-PythonForm[\[Pi]] = "pi";
-PythonForm[E] = "e";
-
-(*real numbers,engineering notation*)
-PythonForm[r_Real] := Block[{a = MantissaExponent[r]}, 
-    If[r >= 0, ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]], 
-     "(" <> ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]] <> ")"]];
-
-(*Everything else*)
-PythonForm[allOther_] := StringReplace[ToString[allOther, FortranForm], greekrule];
-
-HurToPython[exp_] := (
-  CopyToClipboard[PythonForm[exp]];
-  PythonForm[exp]
-  )
-
-
-
-
-
-
-
-
-
-MatlabForm[Rational[a_, b_]] := MatlabForm[a] <> "/" <> MatlabForm[b];
-MatlabForm[Complex[a_, b_]] := "(" <> MatlabForm[a] <> "+" <> MatlabForm[b] <> "j" <> ")";
-MatlabForm[Times[a_, b_]] := MatlabForm[a] <> "*" <> MatlabForm[b];
-MatlabForm[Plus[a_, b_]] := "(" <> MatlabForm[a] <> "+" <> MatlabForm[b] <> ")";
-(* Most of the commands starting with Capital letter will be lowered. 
-  Ex: Sin[xxx] -> sin(xxx). Note that q1[t] -> q1 for simulation purpose. 
-  In HurToolbox, only generalized coordinates and generalized momenta are 
-  functions of time. For simulation purpose, the [t] from q1[t], p1[t] 
-  will be removed. This treatment is only for the combination of HurToolbox 
-  and other numerical packages (e.g., Julia, Matlab). 
-*)
-
-MatlabForm[h_[args__]] := If[MatlabForm[args] === "t", MatlabForm[h], 
-    ToLowerCase[MatlabForm[h]] <> "(" <> MatlabForm[args] <> ")"];
-(* treat Exp -> exp and Sqrt -> sqrt. All other Power will be treated as ()^() *)
-MatlabForm[Power[a_, b_]] := If[MatlabForm[b] === "1/2", 
-    "sqrt" <> "(" <> MatlabForm[a] <> ")", 
-    If[MatlabForm[a] === "exp(1)", 
-      "(" <> "exp" <> "(" <> MatlabForm[b] <> ")", 
-      "(" <> MatlabForm[a] <> ")" <> "^" <> "(" <> MatlabForm[b] <> ")"]];
-MatlabForm[a_ListQ] := StringReplace[ToString[a],{"{" -> "[", "}" -> "]"}];
-MatlabForm[Derivative[a_][b_]] := Switch[a, 1, MatlabForm[b] <> "d", 
-    2, MatlabForm[b] <> "dd", 3, MatlabForm[b] <> "ddd"];
-
-(* Handling matrix *)
-
-MatlabForm[List[args__]] := (
-  Switch[ Length[Dimensions[List[args]]],
-    1,
-    temp="["<> Table[MatlabForm[List[args][[i]]]<>",",{i,Length[List[args]]}] <>"]",
-    2,
-    temp="["<> Table[MatlabForm[List[args][[i]]]<>";",{i,Length[List[args]]}] <>"]"
-    ];
-  temp=StringReplace[temp, {"[[" -> "[", ",];[" -> ";", ",];]" -> "]"}];
-  StringReplace[temp, {",]" -> "]"}]
-  )
-
-(*
-StringReplace[ToString[a], 
-    {"},{" -> ";", "{{" -> "[", "}}" -> "]"}];
-
-"(" <> "[" <> Table[MatlabForm[{args}[[ii]]] <> " ", 
-  {ii, 1, Length@{args}}] <> "]" <> ")";
-*)
-
-(*Pi and E*)
-MatlabForm[\[Pi]] = "pi";
-MatlabForm[Pi] = "pi";
-MatlabForm[E] = "exp(1)";
-(*real numbers,engineering notation*)
-MatlabForm[r_Real] := Block[{a = MantissaExponent[r]}, 
-    If[r >= 0, ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]], 
-     "(" <> ToString[N[a[[1]], 6]] <> "e" <> ToString[a[[2]]] <> ")"]];
-(*Greek characters*)
-greekrule = {"\[Alpha]" -> "alpha", "\[Beta]" -> "beta", 
-    "\[Gamma]" -> "gamma", "\[Delta]" -> "delta", 
-    "\[CurlyEpsilon]" -> "curlyepsilon", "\[Zeta]" -> "zeta", 
-    "\[Eta]" -> "eta", "\[Theta]" -> "theta", "\[Iota]" -> "iota", 
-    "\[Kappa]" -> "kappa", "\[Lambda]" -> "lambda", "\[Mu]" -> "mu", 
-    "\[Nu]" -> "nu", "\[Xi]" -> "xi", "\[Omicron]" -> "omicron", 
-    "\[Pi]" -> "pi", "\[Rho]" -> "rho", 
-    "\[FinalSigma]" -> "finalsigma", "\[Sigma]" -> "sigma", 
-    "\[Tau]" -> "tau", "\[Upsilon]" -> "upsilon", 
-    "\[CurlyPhi]" -> "curlyphi", "\[Chi]" -> "chi", "\[Psi]" -> "psi",
-     "\[Omega]" -> "omega", "\[CapitalAlpha]" -> "Alpha", 
-    "\[CapitalBeta]" -> "Beta", "\[CapitalGamma]" -> "Gamma", 
-    "\[CapitalDelta]" -> "Delta", 
-    "\[CapitalEpsilon]" -> "CurlyEpsilon", "\[CapitalZeta]" -> "Zeta",
-     "\[CapitalEta]" -> "Eta", "\[CapitalTheta]" -> "Theta", 
-    "\[CapitalIota]" -> "Iota", "\[CapitalKappa]" -> "Kappa", 
-    "\[CapitalLambda]" -> "Lambda", "\[CapitalMu]" -> "Mu", 
-    "\[CapitalNu]" -> "Nu", "\[CapitalXi]" -> "Xi", 
-    "\[CapitalOmicron]" -> "Omicron", "\[CapitalPi]" -> "Pi", 
-    "\[CapitalRho]" -> "Rho", "\[CapitalSigma]" -> "Sigma", 
-    "\[CapitalTau]" -> "Tau", "\[CapitalUpsilon]" -> "Upsilon", 
-    "\[CapitalPhi]" -> "CurlyPhi", "\[CapitalChi]" -> "Chi", 
-    "\[CapitalPsi]" -> "Psi", "\[CapitalOmega]" -> "Omega"};
-(*Everything else*)
-MatlabForm[allOther_] := 
-   StringReplace[ToString[allOther, FortranForm], greekrule];
-
-HurToMatlab[exp_] := (
-  CopyToClipboard[MatlabForm[exp]];
-  MatlabForm[exp]
-  )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 End[];
 
