@@ -1677,16 +1677,14 @@ JuliaForm[Derivative[a_][b_]] := Switch[a, 1, JuliaForm[b] <> "d",
 JuliaForm[List[args__]] := "(" <> "[" <> Table[JuliaForm[{args}[[ii]]] <> " ", 
   {ii, 1, Length@{args}}] <> "]" <> ")";
 *)
-JuliaForm[List[args__]] := (
-  Switch[ Length[Dimensions[List[args]]],
-    1,
-    temp="["<> Table[JuliaForm[List[args][[i]]]<>" ",{i,Length[List[args]]}] <>"]",
-    2,
-    temp="["<> Table[JuliaForm[List[args][[i]]]<>";",{i,Length[List[args]]}] <>"]"
-    ];
-  temp=StringReplace[temp, {"[[" -> "[", " ];[" -> ";", " ];]" -> "]"}];
-  StringReplace[temp, {" ]" -> "]"}]
-  )
+JuliaForm[List[args__]] := (Switch[Length[Dimensions[List[args]]], 
+   1, 
+   temp = "[" <> Table[JuliaForm[List[args][[i]]] <> " ", {i,Length[List[args]]}] <> "]",
+   2, 
+   temp = "[" <> Table[JuliaForm[List[args][[i]]] <> ";", {i, Length[List[args]]}] <> "]"
+   ];
+  temp = StringReplace[temp, {"[[" -> "[", "];[" -> ";", "];]" -> "]"}];
+  StringReplace[temp, {" ]" -> "]"}])
 
 (*Pi and E*)
 JuliaForm[\[Pi]] = "pi";
@@ -1897,14 +1895,13 @@ MatlabForm[Derivative[a_][b_]] := Switch[a, 1, MatlabForm[b] <> "d",
 
 (* Handling matrix *)
 
-MatlabForm[List[args__]] := (
-  Switch[ Length[Dimensions[List[args]]],
+MatlabForm[List[args__]] := (Switch[ Length[Dimensions[List[args]]],
     1,
     temp="["<> Table[MatlabForm[List[args][[i]]]<>",",{i,Length[List[args]]}] <>"]",
     2,
     temp="["<> Table[MatlabForm[List[args][[i]]]<>";",{i,Length[List[args]]}] <>"]"
     ];
-  temp=StringReplace[temp, {"[[" -> "[", ",];[" -> ";", ",];]" -> "]"}];
+  temp=StringReplace[temp, {"[[" -> "[", "];[" -> ";", "];]" -> "]"}];
   StringReplace[temp, {",]" -> "]"}]
   )
 
