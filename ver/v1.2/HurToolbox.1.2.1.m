@@ -14,14 +14,6 @@
 
 
   Revision
-  2.0.0
-  Unified the expression for reference frames and triads.
-  old: n, a, b, c, d, ... (this method has conflicts with other naming, e.g., g, n, m, ...)
-  new: rf0, rf1, rf2, rf3, rf4, ... for reference frames
-       i0, j0, k0, i1, j1, k1, i2, j2, k2, ... for triads
-
-
-
   1.2.1
   Corrected simple version conflict
 
@@ -191,7 +183,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "2.0.0";
+$VERSION$ = "1.2.1";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["HurToolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nHurToolbox mainly uses vector manipulation (vectors, dyadics).\nCoordinates and matrix representation of the dyadics are also available.\nAvailable methods: Newton-Euler Method, Euler-Lagrange Method, Hamiltonian Method, Kane's Method.\nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -320,18 +312,10 @@ HurGetGradAutoDiff::usage="HurGetGradAutoDiff[fn_, val__] performs the Automatic
 HurGetGradAutoDiffValue::usage="HurGetGradAutoDiffValue[fn_, val__] is the same as HurGetGradAutoDiff[] except that HurGetGradAutoDiffValue returns the function value as well as the gradient.";
 
 
-HurInitialize[data__:Global`n] := (
-  HurGlobalCoordinateSystemsOption=1;
-  datas=Flatten[List[data]];
-  Switch[Length[datas],
-   0, NewtonianRF=Global`n;,
-   1, NewtonianRF=datas[[1]];,
-   2, NewtonianRF=datas[[1]];If[datas[[2]]==="xyz",HurGlobalCoordinateSystemsOption=2,Null];
-   ];
-
-  HurGlobalRF = {NewtonianRF};
+HurInitialize[] := (  
+  HurGlobalRF = {Global`n};
   HurGlobalDCM = List[RotationMatrix[0, {0, 0, 1}]]; HurGlobalMass={0}; HurGlobalInertia={{0,0,0,0,0,0}};
-  HurGlobalInertiaDyadic={{0,0,0,0,0,0,0,0,0,NewtonianRF,NewtonianRF}};
+  HurGlobalInertiaDyadic={{0,0,0,0,0,0,0,0,0,Global`n,Global`n}};
   HurGlobalForce = {}; HurGlobalMoment = {}; HurGlobalCOMPos = {0}; HurGlobalCOMVel = {0}; HurGlobalCOMAcc = {0};
   HurGlobalAngularVel = {0}; HurGlobalAngularAcc = {0};
   HurGlobalLinearMomentum = {0}; HurGlobalAngularMomentum = {0}; HurGlobalVertical = {0};
@@ -343,15 +327,8 @@ HurInitialize[data__:Global`n] := (
   HurGlobalLambda = {}; HurGlobalGeneralizedConstrainingForce = {};
   HurGlobalConstrainedELEquation = {0}; HurGlobalConstrainedModified = {0};
   HurGlobalNonConservativeForces = {0}; HurGlobalOtherPotentialE = {0}; HurGlobalRayleighDissipationE = {0};
-
-  tempAxisString={"x", "y", "z"};
-  If[HurGlobalCoordinateSystemsOption===1,
-    HurGlobalListTriads = {{i0,j0,k0}};HurGlobalTriadsConversion = {{i0->i0,j0->j0,k0->k0}};
-    ,
-    HurGlobalListTriads = List[Table[Symbol[ToString[NewtonianRF]<>tempAxisString[[j]]],{j,3}]];
-    HurGlobalTriadsConversion = List[Table[Symbol[ToString[NewtonianRF]<>tempAxisString[[j]]] \[Rule] Symbol[ToString[NewtonianRF]<>tempAxisString[[j]]],{j,3}]];
-    ];
-  
+  HurGlobalListTriads = {{nx,ny,nz}}; 
+  HurGlobalTriadsConversion = {{nx->nx,ny->ny,nz->nz}};
   (*HurGlobalTriadsConversion = {0};*)
   HurGlobalSimplify = True; HurGlobalGeneralizedSpeedsExpression = {};
   HurGlobalGeneralizedSpeedsSymbol = {}; HurGlobalKaneEquation = {0};
@@ -369,19 +346,13 @@ Begin["`Private`"];
 
 HurDefineRF[rf__] := (rfs=List[rf];narg=Length[rfs];
   tempAxisString={"x", "y", "z"};
-  tempAxisijkString={"i", "j", "k"};
   Do[
       If[
         HurGetIndexGlobalRF[ rfs[[i]] ]===0
         ,
         AppendTo[HurGlobalRF, rfs[[i]] ]; 
 
-        If[HurGlobalCoordinateSystemsOption===1,
-          AppendTo[HurGlobalListTriads, Table[ Symbol[ tempAxisijkString[[j]] <> ToString[ i ] ], {j,3}] ];
-          ,
-          AppendTo[HurGlobalListTriads, Table[ Symbol[ ToString[ rfs[[i]] ] <> tempAxisString[[j]] ], {j,3}] ];
-          ];
-        
+        AppendTo[HurGlobalListTriads, Table[ Symbol[ ToString[ rfs[[i]] ] <> tempAxisString[[j]] ], {j,3}] ];
 
         AppendTo[HurGlobalDCM, RotationMatrix[0, {0, 0, 1}]];
         HurDefineDCM[ rfs[[i]] ,RotationMatrix[0, {0, 0, 1}] ];
@@ -476,17 +447,11 @@ HurDefineDCMRelative[rf1_, rf2_, rot__] := (
   HurGlobalTriadsConversion=Table[0,{i,nrf}];
 
   tempAxisString={"x", "y", "z"};
-  tempAxisijkString={"i", "j", "k"};
   Do[
     HurGlobalTriadsConversion[[k]] = Table[
       Rot=HurUnifyTriadPool[  HurGlobalRF[[ i ]] , HurGlobalRF[[ k ]] ];
-      If[HurGlobalCoordinateSystemsOption===1,
-        Symbol[ tempAxisijkString[[j]] <> ToString[ i-1 ] ] \[Rule]  
-        Dot[ Rot[[;;,j]],HurGlobalListTriads[[k]] ]
-        ,
-        Symbol[ ToString[ HurGlobalRF[[i]] ] <> tempAxisString[[j]] ] \[Rule]  
-        Dot[ Rot[[;;,j]],HurGlobalListTriads[[k]] ]
-        ]
+      Symbol[ ToString[ HurGlobalRF[[i]] ] <> tempAxisString[[j]] ] \[Rule]  
+      Dot[ Rot[[;;,j]],HurGlobalListTriads[[k]] ]
       ,
       {i,nrf},{j,3}
       ]
@@ -1709,7 +1674,7 @@ HurFullSimplifyVariablesTimed[var_,time_] := (
   )
 
 HurSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[filenames];
-  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalCoordinateSystemsOption","HurGlobalMass","HurGlobalInertia","HurGlobalInertiaDyadic","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify","HurGlobalGeneralizedSpeedsExpression","HurGlobalGeneralizedSpeedsSymbol","HurGlobalKaneEquation","HurGlobalTemp","HurGlobalDependentGeneralizedSpeeds","HurGlobalGC2GS","HurGlobalConstraintsGS","HurGlobalGSConstrainedJacobian","HurGlobalAngularVelAbs","HurGlobalAngularVelRel","HurGlobalDHTable","HurGlobalDHInertia","HurGlobalDHOrigin","HurGlobalGeneralizedMomentumSymbol","HurGlobalGeneralizedMomentumExpression","HurGlobalHamiltonian","HurGlobalHamiltonEquation","HurGlobalHomogeneousTransform"};
+  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
   If[
       nargs===1
       ,
@@ -1728,7 +1693,7 @@ HurSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[f
   )
 
 HurDumpSaveData[filename__] := (filenames=Flatten[ List[ filename ] ];nargs=Length[filenames];
-  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalCoordinateSystemsOption","HurGlobalMass","HurGlobalInertia","HurGlobalInertiaDyadic","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify","HurGlobalGeneralizedSpeedsExpression","HurGlobalGeneralizedSpeedsSymbol","HurGlobalKaneEquation","HurGlobalTemp","HurGlobalDependentGeneralizedSpeeds","HurGlobalGC2GS","HurGlobalConstraintsGS","HurGlobalGSConstrainedJacobian","HurGlobalAngularVelAbs","HurGlobalAngularVelRel","HurGlobalDHTable","HurGlobalDHInertia","HurGlobalDHOrigin","HurGlobalGeneralizedMomentumSymbol","HurGlobalGeneralizedMomentumExpression","HurGlobalHamiltonian","HurGlobalHamiltonEquation","HurGlobalHomogeneousTransform"};
+  tempvar1={"HurGlobalRF","HurGlobalDCM","HurGlobalMass","HurGlobalInertia","HurGlobalForce","HurGlobalMoment","HurGlobalCOMPos","HurGlobalCOMVel","HurGlobalCOMAcc","HurGlobalAngularVel","HurGlobalAngularAcc","HurGlobalLinearMomentum","HurGlobalAngularMomentum","HurGlobalVertical","HurGlobalNEEquation","HurGlobalVariableList","HurGlobalKineticE","HurGlobalPotentialE","HurGlobalLagrangian","HurGlobalELEquation","HurGlobalGeneralizedCoordinates","HurGlobalMMatrix","HurGlobalCMatrix","HurGlobalGVector","HurGlobalConstrainedJacobian","HurGlobalConstraints","HurGlobalLambda","HurGlobalGeneralizedConstrainingForce","HurGlobalConstrainedELEquation","HurGlobalConstrainedModified","HurGlobalNonConservativeForces","HurGlobalOtherPotentialE","HurGlobalRayleighDissipationE","HurGlobalListTriads","HurGlobalTriadsConversion","HurGlobalSimplify"};
   If[
       nargs===1
       ,
