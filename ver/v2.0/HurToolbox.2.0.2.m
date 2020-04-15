@@ -14,12 +14,6 @@
 
 
   Revision
-  2.0.3
-  Changed the order of arguments in HurDHJacobian as follows to be consistent with HurDHJacobian[rf6]
-  HurDHJacobian[{x,y,z},rf6] -> HurDHJacobian[rf6,{x,y,z}]
-  Updated HurDHTable[] to correct definition of rf number with dh[[i,1]]
-  Added HurDHMMatrix[]. This is exactly the same as HurGetMMatrix1[]
-
   2.0.2
   Revised HurDHJacobian[data__] to handle the following cases.
   HurDHJacobian[rf6]: computes the Jacobian matrix for rf6 at its origin with respect to rf0.
@@ -206,7 +200,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "2.0.3";
+$VERSION$ = "2.0.2";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["HurToolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nHurToolbox mainly uses vector manipulation (vectors, dyadics).\nCoordinates and matrix representation of the dyadics are also available.\nAvailable methods: Newton-Euler Method, Euler-Lagrange Method, Hamiltonian Method, Kane's Method.\nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -274,7 +268,6 @@ HurSetELEquation::usage="HurSetELEquation[eq_,gc_]";
 HurGetJacobian::usage="HurGetJacobian[vec_,rf1_,rf2_] computes Jacobian matrix. vec_ can be either a position vector of a point of interest or velocity vector. rf1_ is the RF for angular velocity of your interest. rf2_ is expression of your vec_. rf2_ is usually n. However, it can also be a or b depending on your convenience."; 
 HurGetMMatrix::usage="HurGetMMatrix[] returns the inertia matrix.";
 HurGetMMatrix1::usage="HurGetMMatrix1[] returns the inertia matrix.";
-HurDHMMatrix::usage="HurDHMMatrix[] returns the inertia matrix based on DH table. Make sure that HurDHJacobian[], HurDHInertia[] are run beforehand. Once these two are run, then HurDHMMatrix[] is exactly the same as HurGetMMatrix1[]";
 HurGetCMatrix::usage="HurGetCMatrix[] returns the matrix for Coriolis and centrifugal forces";
 HurGetGVector::usage="HurGetGVector[] returns the gravity vector. Note that it will also return other forces due to spring and Rayleigh Dissipative (viscous damping) forces.";
 HurNEEquation::usage="HurNEEquation[]";
@@ -300,7 +293,7 @@ HurDefineLambda::usage="HurDefineLambda[]";
 HurDefineNonConservativeForces::usage="HurDefineNonConservativeForces[f__]"; 
 HurResetNonConservativeForces::usage="HurResetNonConservativeForces[]"; 
 HurDefineOtherPotentialE::usage="HurDefineOtherPotentialE[rf_, pe_] accepts the additional potential energy other than gravity in Lagrangian mechanics. Example includes spring. If intrinsic generalized coordinates (e.g., joint angles) are used, elastic energy will be uniquely assigned to a RF. However, if your GC's are extrinsic, then assignment of elastic energy to an RF is ambiguous. However, it doesn't matter since we simply need the total sum of the elastic energies. Therefore, simply assign the elastic energy to an any reasonable RF."; 
-HurDefineRayleighDissipationE::usage="HurDefineRayleighDissipationE[rf_, de_] accepts the velocity-proportional frictional forces in Lagrangian mechanics. Example includes viscous damping friction. de is the energy due to dissipation energy. rf does not matter."; 
+HurDefineRayleighDissipationE::usage="HurDefineRayleighDissipationE[rf_, de_] accepts the velocity-proportional frictional forces in Lagrangian mechanics. Example includes viscous damping friction."; 
 HurGetInertiaTensor::usage="HurGetInertiaTensor[rf_]"; 
 HurProductMatVec::usage="HurProductMatVec[mat_,vec_,rf_]"; 
 HurDefineGeneralizedMomentumSymbol::usage="HurDefineGeneralizedMomentumSymbol[] defines the symbols for the generalized momenta. Please make sure that generalied coordinates are defined beforehand. The numbers of generalized momenta and generalized coordinates are the same."; 
@@ -319,9 +312,8 @@ HurDHInertia::usage="HurDHInertia[data_]";
 HurGetHomogeneousTransformDH::usage="HurGetHomogeneousTransformDH[dh_]";
 HurGetRelativeHomogeneousTransform::usage="HurGetRelativeHomogeneousTransform[dh_]";
 HurInverseHomogeneousTransform::usage="HurInverseHomogeneousTransform[dh_]";
-HurDHJacobian::usage="HurDHJacobian[data__] that computes the Jacobian. Two usages: i) HurDHJacobian[rf6] returns the Jacobian of rf6 at its origin. i) HurDHJacobian[rf6,{x,y,z}] returns the Jacobian of rf6 at the offset {x,y,z} from its origin.";
+HurDHJacobian::usage="HurDHJacobian[rf_] that computes the Jacobian of the RF at its origin.";
 HurDHRetrieveGeneralizedCoordinate::usage="HurDHRetrieveGeneralizedCoordinate[dh_] retrieves the generalized coordinates from the DH table.";
-HurDHELEquation::usage="HurDHELEquation[] computes the M,C,G. Once run, check HurGlobalMMatrix, HurGlobalCMatrix, HurGlobalGVector";
 HurSimplifyVariablesTimed::usage="HurSimplifyVariablesTimed[var_,time_] simplifies all the elements of the provided var_ within the provided time_ for each element. If timed out, it will return its original expression"; 
 HurFullSimplifyVariablesTimed::usage="HurFullSimplifyVariablesTimed[var_,time_] fully simplifies all the elements of the provided var_ within the provided time_ for each element. If timed out, it will return its original expression"; 
 HurDumpSaveData::usage="HurDumpSaveData[filename__] Please use .mx for the extension of the filename. It will save variables in binary (unreadable) expression, is very fast to load (with large data). However, this binary data are platform-specific. If saved in Mac, it cannot be used in Windows or Linux.";
@@ -396,7 +388,7 @@ HurDefineRF[rf__] := (rfs=List[rf];narg=Length[rfs];
         AppendTo[HurGlobalRF, rfs[[i]] ]; 
 
         If[HurGlobalCoordinateSystemsOption===1,
-          AppendTo[HurGlobalListTriads, Table[ Symbol[ tempAxisijkString[[j]] <> ToString[ HurGetIndexGlobalRF[ rfs[[i]] ]-1 ] ], {j,3}] ];
+          AppendTo[HurGlobalListTriads, Table[ Symbol[ tempAxisijkString[[j]] <> ToString[ i ] ], {j,3}] ];
           ,
           AppendTo[HurGlobalListTriads, Table[ Symbol[ ToString[ rfs[[i]] ] <> tempAxisString[[j]] ], {j,3}] ];
           ];
@@ -1381,27 +1373,6 @@ HurGetMMatrix1[] := (
   HurGlobalMMatrix
   )
 
-(* HurGetMMatrix1[] exactly the same as HurDHMMatrix[] *)
-HurDHMMatrix[] := (
-  nrfs=HurGetNumGlobalRF[];
-  tempM=
-    Table[ 
-      Jac=HurDHJacobian[HurGlobalRF[[i]], HurGlobalDHInertia[[i-1, 3]] ];
-      (* Jac=HurGetJacobian[ HurGlobalCOMPos[[i]], HurGlobalRF[[i]], HurGlobalRF[[1]] ]; *) (* This is the same *)
-      Jacv=Jac[[1;;3,;;]];
-      Jacw=Jac[[4;;6,;;]];
-      temp1=HurGlobalMass[[i]]*Transpose[Jacv].Jacv;
-      rot=HurGetRelativeDCM[ HurGlobalRF[[i]],HurGlobalRF[[1]] ];
-      II=HurGetInertiaTensor[ HurGlobalRF[[i]] ];
-      temp2=Transpose[Jacw].rot.II.Transpose[rot].Jacw;
-      temp=temp1+temp2;
-      If[HurGlobalSimplify, Simplify[temp], temp]
-      ,{i,2,nrfs}
-      ];
-  HurGlobalMMatrix=Total[tempM];
-  HurGlobalMMatrix
-  )
-
 HurGetCMatrix[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Length[gcs];
   HurGlobalCMatrix=Table[
     Total[
@@ -1414,7 +1385,7 @@ HurGetCMatrix[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Le
     , 
     {k, narg}, {j, narg}
     ];
-  HurGlobalCMatrix=If[HurGlobalSimplify, Simplify[HurGlobalCMatrix], HurGlobalCMatrix]
+  HurGlobalCMatrix
   )
 
 HurGetGVector[] := (gcs=Flatten[ List[HurGlobalGeneralizedCoordinates] ];narg=Length[gcs];
@@ -1617,7 +1588,7 @@ HurDHTable[dh_] := (
   HurGlobalDHTable=dh;
     (* define RF*)
     Do[
-      HurDefineRF[ Symbol[ "rf" <> ToString[ dh[[i,1]] ] ]];
+      HurDefineRF[ Symbol[ "rf" <> ToString[i] ]];
       , 
       {i,ndh}
     ];
@@ -1671,8 +1642,8 @@ HurDHJacobian[data__] := (
     vec=HurCoordTriads[Flatten[d], HurGlobalRF[[1]]];
     Jac=HurGetJacobian[vec,rf,HurGlobalRF[[1]]];
     ,
-    offset=HurList2Column[ datavec[[2]] ];
-    rf=datavec[[1]];
+    offset=HurList2Column[ datavec[[1]] ];
+    rf=datavec[[2]];
     T = HurGetRelativeHomogeneousTransform[rf, HurGlobalRF[[1]]];
     Rot=T[[1 ;; 3, 1 ;; 3]];
     d=T[[1 ;; 3, 4]]+Rot.offset;
@@ -1708,13 +1679,6 @@ HurDHInertia[data_] := (
     ,
     Print["The number of inertial information does not match with the number of links."];
   ];
-  )
-
-HurDHELEquation[] := (
-    HurGetLagrangian[];
-    HurDHMMatrix[];
-    HurGetCMatrix[];
-    HurGetGVector[];
   )
 
 HurSimplifyVariablesTimed[var_,time_] := (
