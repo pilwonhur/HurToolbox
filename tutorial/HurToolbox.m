@@ -14,11 +14,6 @@
 
 
   Revision
-  2.0.5
-  Revised HurNEInverse[]. When 2D NE EOMs are derived, HurNEInverse[] does not work since HurToolbox assumes 3D formulation.
-  If 2D NE formulation is used, HurNEInverse[] drops all zero components in the HurGlobalNEEquation in the computation.
-  Remember that appropriate HurDefineVariableList[] should be defined. That is, include forces and moments used in 2D.
-
   2.0.4
   Added HurKinematics[] in HurDHInertia[] function. 
 
@@ -214,7 +209,7 @@ BeginPackage["HurToolbox`"];
 (* Usage statements *)
 HurInitialize::usage="This procedure resets all global variables.";
 
-$VERSION$ = "2.0.5";
+$VERSION$ = "2.0.4";
 $EMAIL$ = "pilwonhur@tamu.edu";
 Print["HurToolbox for modeling and analysis of multibody systems ", $VERSION$, ". \nHurToolbox mainly uses vector manipulation (vectors, dyadics).\nCoordinates and matrix representation of the dyadics are also available.\nAvailable methods: Newton-Euler Method, Euler-Lagrange Method, Hamiltonian Method, Kane's Method.\nCopyright 2019 Pilwon Hur\nDepartment of Mechanical Engineering\nTexas A&M University\nAll rights reserved.\nEmail questions, comments, or concerns to ", $EMAIL$, "."];
 
@@ -994,7 +989,6 @@ HurSolveNEInverse[] := (
 
 HurNEInverse[] := (
   TempNEEquation=Flatten[HurGlobalNEEquation];
-  TempNEEquation=DeleteCases[TempNEEquation,0]
   n=Length[TempNEEquation];
   m=Length[HurGlobalVariableList];
 

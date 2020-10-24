@@ -1,0 +1,13 @@
+git add .
+git commit -m "comments"
+git remote add origin https://github.com/pilwonhur/HurToolbox.git
+git push -u origin master
+
+
+git status
+
+git config --global user.name "pilwonhur"
+git config --global user.email "pilwonhur@gmail.com"
+
+
+git config --get remote.origin.url
