@@ -2,6 +2,11 @@ git add .
 git commit -m "comments"
 git remote add origin https://github.com/pilwonhur/HurToolbox.git
 git push -u origin master
+or
+git push
+
+
+
 
 
 git status
